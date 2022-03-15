@@ -1,0 +1,26 @@
+@import './reset.css';
+/*@import './variables.css';*/
+@tailwind base;
+@tailwind components;
+
+*{
+    box-sizing: border-box;
+}
+body{
+    width: 100%;
+    height: 1000vh;
+}
+body > *{
+    width: 100%;
+}
+span{
+    letter-spacing: -0.08em;
+}
+@tailwind utilities;
+
+@layer base{
+    :root{
+        --frame-padding: 0 100px;
+        --color-purple: #5F0080;
+    }
+}
