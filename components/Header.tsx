@@ -7,7 +7,7 @@ import NavBar from "./NavBar";
 
 export default function () {
     return (
-        <header>
+        <header className="text-kurly-black">
             <div className="w-full flex py-2 px-[6.3rem] justify-end items-center space-x-2 bg-kurly-purple  ">
                 <a className="flex justify-center items-center flex-1 text-[0.82rem]">
                     <span className="font-medium mr-4 text-white">지금 가입하고 인기상품 100원에 받아가세요!</span>

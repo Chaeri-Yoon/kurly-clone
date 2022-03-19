@@ -6,8 +6,8 @@ export default function Layout({ children }: any) {
         <>
             <Head><title>Kurly :: Daily Groceries</title></Head>
             <Header />
-            <main>
-                <div>{children}</div>
+            <main className="p-[var(--frame-padding)]">
+                {children}
             </main>
         </>
     )

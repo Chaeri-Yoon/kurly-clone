@@ -19,6 +19,9 @@ module.exports = {
         kurly: {
           purple: '#5F0080'
         }
+      },
+      gridTemplateColumns: {
+        productGrid: 'repeat(auto-fit, minmax(250px, 1fr))',
       }
     }
   },
