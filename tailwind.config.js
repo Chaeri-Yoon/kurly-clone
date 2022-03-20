@@ -6,7 +6,8 @@ module.exports = {
     extend: {
       backgroundColor: {
         kurly: {
-          purple: '#5F0080'
+          purple: '#5F0080',
+          black: '#4e4f4f'
         }
       },
       textColor: {
@@ -26,4 +27,5 @@ module.exports = {
     }
   },
   plugins: [],
+  mode: 'jit'
 }
