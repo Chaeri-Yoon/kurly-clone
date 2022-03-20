@@ -6,7 +6,6 @@
 
 *{
     box-sizing: border-box;
-    
 }
 body{
     width: 100%;
@@ -29,5 +28,6 @@ span{
         --frame-padding: 0 100px;
         --color-purple: #5F0080;
         --color-black: #4e4f4f;
+        --offset-width: calc(100vw - 100%);
     }
 }
