@@ -8,12 +8,12 @@ import NavBar from "./NavBar";
 export default function () {
     return (
         <header className="text-kurly-black">
-            <div className="w-full flex py-2 px-[6.3rem] justify-end items-center space-x-2 bg-kurly-purple  ">
+            <div className="relative w-full py-3 px-[6.3rem] flex justify-center items-center space-x-2 bg-kurly-purple  ">
                 <a className="flex justify-center items-center flex-1 text-[0.82rem]">
-                    <span className="font-medium mr-4 text-white">지금 가입하고 인기상품 100원에 받아가세요!</span>
-                    <span className="opacity-70"><FontAwesomeIcon icon={faChevronRight} /></span>
+                    <span className="font-medium mr-5 text-white">지금 가입하고 인기상품 100원에 받아가세요!</span>
+                    <span className="opacity-70"><FontAwesomeIcon icon={faChevronRight} color="white" /></span>
                 </a>
-                <button className="px-2 opacity-70"><FontAwesomeIcon icon={faXmark} /></button>
+                <button className="absolute right-[6.5rem] opacity-70 text-xl"><FontAwesomeIcon icon={faXmark} color="white" /></button>
             </div>
             <div className="my-2 flex justify-between items-start p-[var(--frame-padding)] text-xs ">
                 <div className="w-1/3 flex justify-start items-center font-semibold">

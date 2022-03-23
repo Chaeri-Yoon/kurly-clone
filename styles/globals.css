@@ -21,6 +21,13 @@ body > *{
 span{
     letter-spacing: -0.08em;
 }
+a{
+    cursor: pointer;
+}
+a:visited{
+    color: inherit;
+    text-decoration: none;
+}
 @tailwind utilities;
 
 @layer base{

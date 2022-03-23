@@ -1,11 +1,11 @@
 import Image from "next/image";
 
-interface ISalePromoBanner {
+interface IAd {
     id: number,
     imageUrl: string,
     arrFilenames: string[]
 }
-export default function ({ id, imageUrl, arrFilenames }: ISalePromoBanner) {
+export default function ({ id, imageUrl, arrFilenames }: IAd) {
     return (
         <>
             {id === 0 && (

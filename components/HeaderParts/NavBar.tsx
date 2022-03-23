@@ -22,7 +22,7 @@ export default function () {
                         <li className={`${styleNavList} text-left py-3 group`}>
                             <FontAwesomeIcon icon={faBars} />
                             <span className='inline-block ml-3 text-inherit'>전체 카테고리</span>
-                            <div className="hidden absolute justify-center top-full h-[276px] overflow-y-scroll w-1/3 border border-t-0 group-hover:flex hover:flex">
+                            <div className="hidden absolute justify-center top-full h-[276px] overflow-y-scroll w-1/3 border border-t-0 bg-white z-[100] group-hover:flex hover:flex">
                                 <ul className='py-2 w-full flex flex-col items-start space-y-5'>
                                     <DropdownList icon={faCarrot} text="채소" />
                                     <DropdownList icon={faAppleWhole} text="과일·견과·쌀" />
@@ -50,9 +50,9 @@ export default function () {
                         <FontAwesomeIcon icon={faMagnifyingGlass} className='absolute right-7 text-lg' />
                     </form>
                     <ul className='py-2 flex justify-end items-center space-x-5 text-3xl'>
-                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faLocationDot} /></li>
-                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faHeart} /></li>
-                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faCartShopping} /></li>
+                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faLocationDot} className='cursor-pointer' /></li>
+                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faHeart} className='cursor-pointer' /></li>
+                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faCartShopping} className='cursor-pointer' /></li>
                     </ul>
                 </nav>
             </div>
