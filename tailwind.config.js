@@ -1,4 +1,5 @@
 module.exports = {
+
   content: [
     "./pages/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"
   ],
@@ -20,9 +21,6 @@ module.exports = {
         kurly: {
           purple: '#5F0080'
         }
-      },
-      gridTemplateColumns: {
-        productGrid: 'repeat(auto-fit, minmax(250px, 1fr))',
       }
     }
   },

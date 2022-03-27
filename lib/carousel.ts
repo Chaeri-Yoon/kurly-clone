@@ -5,17 +5,17 @@ interface ICarousel {
     setItemIndex: Dispatch<SetStateAction<number>>;
     itemWidth: number;
     setItemWidth: Dispatch<SetStateAction<number>>;
+    itemsLength: number;
+    frame: MutableRefObject<HTMLElement | null>;
+    defaultTransitionTime: number;
     autoMoveTimeout?: NodeJS.Timeout | null;
     setAutoMoveTimeout?: Dispatch<SetStateAction<NodeJS.Timeout | null>> | null;
-    frame: MutableRefObject<HTMLUListElement | null>;
-    itemImageFiles: string[];
-    defaultTransitionTime: number;
 }
 
 export default function ({
-    itemIndex, setItemIndex, itemWidth, setItemWidth,
-    autoMoveTimeout = null, setAutoMoveTimeout = null,
-    frame, itemImageFiles, defaultTransitionTime }: ICarousel) {
+    itemIndex, setItemIndex, itemWidth, setItemWidth, itemsLength,
+    frame, defaultTransitionTime,
+    autoMoveTimeout, setAutoMoveTimeout = null }: ICarousel) {
     const moveTransitionEffect = (action = `all ${defaultTransitionTime}s ease-out`) => frame && frame.current && (frame.current.style.transition = action);
     const initialSetting = () => {
         setItemWidth(frame?.current?.offsetWidth ? frame?.current?.offsetWidth : window.innerWidth);
@@ -25,14 +25,14 @@ export default function ({
         }, 300);
         window.addEventListener('resize', () => setItemWidth(frame?.current?.offsetWidth ? frame?.current?.offsetWidth : window.innerWidth));
     };
-    const moveItem = () => {
-        const isStartImageClone = itemIndex === itemImageFiles?.length + 1;
+    const rotateItem = () => {
+        const isStartImageClone = itemIndex === itemsLength + 1;
         const isEndImageClone = itemIndex === 0;
 
         if (isStartImageClone || isEndImageClone) {
             setTimeout(() => {
                 moveTransitionEffect("none");
-                setItemIndex(isStartImageClone ? 1 : itemImageFiles?.length);
+                setItemIndex(isStartImageClone ? 1 : itemsLength);
                 return;
             }, defaultTransitionTime * 1000);
         }
@@ -50,6 +50,9 @@ export default function ({
         }
         frame && frame.current && (frame.current.style.transform = `translateX(-${itemIndex * itemWidth}px)`);
     };
+    const moveItem = () => {
+        frame && frame.current && (frame.current.style.transform = `translateX(-${itemIndex * itemWidth}px)`);
+    }
 
     const onClickedBack = () => {
         if (itemIndex === 0) return;
@@ -57,9 +60,9 @@ export default function ({
         setItemIndex(prev => prev - 1);
     }
     const onClickedNext = () => {
-        if (itemIndex === itemImageFiles?.length + 1) return;
+        if (itemIndex === itemsLength + 1) return;
         moveTransitionEffect();
         setItemIndex(prev => prev + 1);
     }
-    return { initialSetting, moveItem, onClickedBack, onClickedNext };
+    return { initialSetting, rotateItem, moveItem, onClickedBack, onClickedNext };
 }

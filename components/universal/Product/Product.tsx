@@ -7,9 +7,9 @@ export default function () {
     return (
         /* The data in this code will be replaced with the one getting data through api */
         /* The whole div will be wrapped inside Link */
-        <div className="w-full">
+        <div className="w-[calc(25%-0.8rem)] inline-block cursor-pointer ">
             <div className="w-full aspect-[250/315] relative">
-                <Image src='/product-img.jpg' layout='fill'></Image>
+                <Image src='/product-img.jpg' layout="fill"></Image>
                 <button className="absolute bottom-4 right-4 flex justify-center items-center w-1/6 aspect-square rounded-full z-10 bg-kurly-purple opacity-60"><FontAwesomeIcon icon={faCartShopping} inverse /></button>
             </div>
             <div className="flex flex-col justify-center items-start">

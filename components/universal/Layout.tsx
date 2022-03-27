@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Header from "./HeaderParts/Header";
+import Header from "../page-components/HeaderParts/Header";
 
 export default function Layout({ children }: any) {
     return (

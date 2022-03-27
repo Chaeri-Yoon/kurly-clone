@@ -1,18 +1,12 @@
 import type { NextPage } from 'next'
-import Product from '../components/Product/Product'
-import AdContainer from '../components/AutoMoveCarousel/AutoMoveAdsContainer';
+import AdContainer from '../components/page-components/AutoMoveCarousel/AutoMoveAdsContainer';
+import ProductContainer from '../components/universal/Product/ProductContainer';
 
 const Home: NextPage = () => {
-
-
   return (
     <>
       <AdContainer />
-      {/*
-      <div className='p-[var(--frame-padding)] w-full grid grid-cols-productGrid gap-4 '>
-        {[1, 1, 1, 1].map((_, i) => <Product key={i}></Product>)}
-      </div>
-              */}
+      <ProductContainer title={"이 상품 어때요?"} />
     </>
   )
 }
