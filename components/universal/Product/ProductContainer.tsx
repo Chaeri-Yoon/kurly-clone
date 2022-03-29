@@ -1,13 +1,16 @@
+import { Product as ProductData } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 import carousel from "../../../lib/carousel";
 import classAppend from "../../../lib/classAppend";
 import MoveCarouselButton from "../MoveCarouselButton"
 import Product from "./Product"
 
-interface IProductContainer {
-    title: string
+interface ProductsResponse {
+    recommendations: ProductData[]
 }
-export default function ({ title }: IProductContainer) {
+export default function ({ title }: { title: string }) {
+    const { data } = useSWR<ProductsResponse>('/api/recommendations');
     const [pageIndex, setPageIndex] = useState(0);
     const [pageWidth, setPageWidth] = useState(0);
     const pageFrame = useRef<HTMLDivElement | null>(null);
@@ -29,7 +32,11 @@ export default function ({ title }: IProductContainer) {
             <div className="w-full relative ">
                 <div className="w-full overflow-hidden">
                     <div className='w-full whitespace-nowrap' ref={pageFrame}>
-                        {[[1, 1, 1, 1], [1, 1, 1, 1]].map((productGroup, i) => <div key={i} className="w-full inline-block space-x-[1rem]">{productGroup.map((_, j) => <Product key={4 * i + j} />)}</div>)}
+                        {data?.recommendations && [1, 1].map((_, i) =>
+                            <div key={i} className="w-full inline-block space-x-[1rem]">
+                                {data.recommendations.slice(4 * i, 4 * (i + 1)).map((product, j) => <Product key={4 * i + j} imgUrl={product.image} name={product.name} originalPrice={product.originalPrice} salePercentage={product.salePercentage} />)}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <MoveCarouselButton isLeft={true} onClick={onClickedBack} containerStyle={classAppend('-translate-y-[135%] -left-[2.5%] w-[5%]', pageIndex === 0 ? 'hidden' : 'inline-block')} />
@@ -38,3 +45,8 @@ export default function ({ title }: IProductContainer) {
         </div>
     )
 }
+/*
+<div key={i} className="w-full inline-block space-x-[1rem]">
+                                {data.recommendations.slice(4 * i, 4 * (i + 1)).map((product, j) => <Product key={4 * i + j} imgUrl={product.image} name={product.name} originalPrice={product.originalPrice} salePercentage={product.salePercentage} />)}
+                            </div>
+                            */

@@ -9,7 +9,7 @@ export default function () {
     const [salePromoWidth, setSalePromoWidth] = useState(0);
     const [autoMoveTimeout, setAutoMoveTimeout] = useState<NodeJS.Timeout | null>(null);
     const salePromoFrame = useRef<HTMLUListElement | null>(null);
-    const { data: salePromoImages } = useSWR('/api/getSalePromoImages');
+    const { data: salePromoImages } = useSWR('/api/salePromoImages');
 
     const { initialSetting, rotateItem, onClickedBack, onClickedNext } = carousel({
         itemIndex: salePromoIndex,
