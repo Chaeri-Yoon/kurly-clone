@@ -1,14 +1,13 @@
 import client from "@libs/server/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Category } from "@prisma/client";
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {
-    const recommendations = await client.product.findMany({
+    const product = await client.product.findUnique({
         where: {
-            category: Category.RECOMMENDATION
+            id: +req.query.id
         }
     })
     res.json({
-        recommendations
+        product
     })
 }

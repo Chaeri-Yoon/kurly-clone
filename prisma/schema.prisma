@@ -13,18 +13,17 @@ datasource db {
 }
 
 model Product {
-  id             Int      @id @default(autoincrement())
-  category       Category @default(RECOMMENDATION)
-  name           String   @unique
+  id             Int         @id @default(autoincrement())
+  category       Category    @default(RECOMMENDATION)
+  name           String      @unique
   salePercentage Int
   originalPrice  Int
   image          String
   description    String?
   sellingUnit    String?
-  weight         Int?
-  deliveryType   String
+  weight         String?
   origin         String?
-  packageType    String
+  packageType    PackageType
 }
 
 enum Category {
@@ -34,4 +33,10 @@ enum Category {
   TOPREVIEW
   HOT
   LASTSALE
+}
+
+enum PackageType {
+  ROOM_PAPER
+  COOL_STYROFOAM
+  ICE_STYROFOAM
 }

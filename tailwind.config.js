@@ -14,7 +14,8 @@ module.exports = {
       textColor: {
         kurly: {
           purple: '#5F0080',
-          black: '#4e4f4f'
+          black: '#4e4f4f',
+          grey: '#999'
         }
       },
       borderColor: {

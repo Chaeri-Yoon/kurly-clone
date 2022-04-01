@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import carousel from "../../../lib/carousel";
-import MoveCarouselButton from "../../universal/MoveCarouselButton";
+import carousel from "@libs/carousel";
+import MoveCarouselButton from "@universal/MoveCarouselButton";
 import Ad from "./AutoMoveAd";
 
 export default function () {
