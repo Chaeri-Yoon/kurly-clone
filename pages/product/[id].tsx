@@ -93,7 +93,7 @@ const ProductDetail: NextPage = () => {
                             <div className='w-full flex justify-end items-center'>
                                 <span className='text-[0.812rem]'>총 상품금액 : </span>
                                 <div>
-                                    <span className='ml-2 text-[2rem]'>{saledPrice}</span>
+                                    <span className='ml-2 text-[2rem]'>{saledPrice.toLocaleString()}</span>
                                     <span className='ml-[0.25rem] text-xl'>원</span>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@ const ProductDetail: NextPage = () => {
                 </div>
             </div>
         )
-            : <>Loading...</>
+            : <></>
     )
 }
 

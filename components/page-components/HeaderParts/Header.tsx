@@ -4,6 +4,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons"
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import NavBar from "./NavBar";
+import Link from "next/link";
 
 export default function () {
     return (
@@ -24,7 +25,7 @@ export default function () {
                 </div>
                 <div className="w-1/3 flex justify-center items-start">
                     <div className="my-1 w-[30%] aspect-[206/158] relative">
-                        <Image src='/kurly-logo.webp' layout="fill"></Image>
+                        <Link href='/'><a><Image src='/kurly-logo.webp' layout="fill"></Image></a></Link>
                     </div>
                 </div>
                 <div className="w-1/3 flex justify-end items-center divide-x ">

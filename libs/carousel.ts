@@ -19,10 +19,6 @@ export default function ({
     const moveTransitionEffect = (action = `all ${defaultTransitionTime}s ease-out`) => frame && frame.current && (frame.current.style.transition = action);
     const initialSetting = () => {
         setItemWidth(frame?.current?.offsetWidth ? frame?.current?.offsetWidth : window.innerWidth);
-        moveTransitionEffect("none");
-        setTimeout(() => {
-            moveTransitionEffect();
-        }, 300);
         window.addEventListener('resize', () => setItemWidth(frame?.current?.offsetWidth ? frame?.current?.offsetWidth : window.innerWidth));
     };
     const rotateItem = () => {
@@ -48,7 +44,7 @@ export default function ({
                 }, 5000));
             }
         }
-        frame && frame.current && (frame.current.style.transform = `translateX(-${itemIndex * itemWidth}px)`);
+        moveItem();
     };
     const moveItem = () => {
         frame && frame.current && (frame.current.style.transform = `translateX(-${itemIndex * itemWidth}px)`);
