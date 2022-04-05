@@ -29,7 +29,7 @@ export default function () {
                     </div>
                 </div>
                 <div className="w-1/3 flex justify-end items-center divide-x ">
-                    <a className="px-2">회원가입</a>
+                    <Link href='/user/join'><a className="px-2">회원가입</a></Link>
                     <a className="px-2">로그인</a>
                     <a className="px-2">
                         <span>고객센터</span>
