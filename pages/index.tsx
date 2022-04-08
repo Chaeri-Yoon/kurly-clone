@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
-import AdContainer from '../components/page-components/AutoMoveCarousel/AutoMoveAdsContainer';
-import ProductContainer from '@universal/Product/ProductContainer';
+import AdContainer from '@components/AutoMoveCarousel/AutoMoveAdsContainer';
+import ProductContainer from '@components/Product/ProductContainer';;
 
 const Home: NextPage = () => {
   return (

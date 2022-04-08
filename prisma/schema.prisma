@@ -12,6 +12,16 @@ datasource db {
   referentialIntegrity = "prisma"
 }
 
+model User {
+  id       Int     @id @default(autoincrement())
+  userId   String  @unique
+  password String
+  name     String
+  email    String?
+  contact  String?
+  address  String?
+}
+
 model Product {
   id             Int         @id @default(autoincrement())
   category       Category    @default(RECOMMENDATION)

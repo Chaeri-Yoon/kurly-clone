@@ -5,7 +5,6 @@ import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
-import { useEffect } from 'react';
 
 type TPackageType = {
     [index: string]: string

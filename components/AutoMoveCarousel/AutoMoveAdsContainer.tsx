@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import carousel from "@libs/carousel";
-import MoveCarouselButton from "@universal/MoveCarouselButton";
+import MoveCarouselButton from "../MoveCarouselButton";
 import Ad from "./AutoMoveAd";
 
 export default function () {
@@ -23,7 +23,14 @@ export default function () {
         defaultTransitionTime: 0.4
     });
     useEffect(initialSetting, []);
-    useEffect(rotateItem, [salePromoWidth, salePromoIndex]);
+
+    let mounted = true;
+    useEffect(() => {
+        if (mounted) rotateItem();
+        return (): void => {
+            mounted = false;
+        }
+    }, [salePromoWidth, salePromoIndex]);
 
     return (
         <div className='w-full aspect-[1511/294]'>

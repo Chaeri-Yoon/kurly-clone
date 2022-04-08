@@ -1,28 +1,38 @@
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { faCircle } from '@fortawesome/free-regular-svg-icons';
+import { faCircle, faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
-import { FieldErrors, SubmitHandler, useForm } from 'react-hook-form';
-import React from 'react';
+import { FieldErrors, useForm, UseFormSetValue } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import useCallApi from '@libs/useCallApi';
+import useSWR from 'swr';
+import { useRouter } from 'next/router';
 
 interface IForm {
-    [key: string]: any,
-    id: string,
+    userId: string,
     password: string,
     password_confirm: string,
     name: string,
     email?: string,
-    contact: string,
+    contact?: string,
     address?: string
 }
 const Join: NextPage = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm<IForm>({ mode: 'onChange' });
-    const onSubmit = (data: SubmitHandler<IForm>) => {
+    const router = useRouter();
+    const [createUser, { data }] = useCallApi({ url: '/api/user/join', method: 'POST' });
+    const { setValue, register, handleSubmit, formState: { errors } } = useForm<IForm>({ mode: 'onChange' });
+    const onSubmit = (data: IForm) => {
         console.log(data);
+        createUser(data);
     }
     const onSubmitFailed = (error: FieldErrors<IForm>) => {
         console.log(error);
     }
+    useEffect(() => {
+        if (!data?.ok) return;
+        console.log("User Create is completed!");
+        router.push('/');
+    }, [data])
     const className = {
         ROW: 'w-full flex justify-between items-center',
         LABEL: 'w-[23%] font-semibold',
@@ -32,9 +42,8 @@ const Join: NextPage = () => {
         INPUT: 'px-4 w-full',
         DATA_CONFIRM_BUTTON: 'ml-2 flex-1 border-kurly-purple text-kurly-purple font-semibold',
         CHECK_AREA_CHILD: 'flex-1 flex justify-between items-center',
-        CHECK_BUTTON: 'mr-3 text-2xl',
         REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5',
-        DEFAULT_ERROR_MESSAGE: `${!errors || !errors.id && '!text-black'}`
+        DEFAULT_ERROR_MESSAGE: `${!errors || !errors.userId && '!text-black'}`
     }
     return (
         <div className='w-full flex justify-center items-center'>
@@ -48,27 +57,27 @@ const Join: NextPage = () => {
                                 <span className={`${className.LABEL}`}>아이디<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA} w-full`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <input {...register("id", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                        <input {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
                             {/*
                             <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
-                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.id?.type === 'minLength' ? 'text-red-500' : (errors?.id?.type === 'required' ? 'text-red-500' : 'text-green-500')}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
-                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.id?.type === 'required' ? 'text-red-500' : 'text-green-500'}`}>아이디 중복확인</span>
+                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.userId?.type === 'minLength' ? 'text-red-500' : (errors?.userId?.type === 'required' ? 'text-red-500' : 'text-green-500')}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
+                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.userId?.type === 'required' ? 'text-red-500' : 'text-green-500'}`}>아이디 중복확인</span>
                             </div>
                             */}
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password", { required: true, minLength: 10 })} placeholder='비밀번호를 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password", { required: true, minLength: 6 })} placeholder='비밀번호를 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호확인<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password_confirm", { required: true, minLength: 10 })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password_confirm", { required: true, minLength: 6 })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
@@ -83,24 +92,23 @@ const Join: NextPage = () => {
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         <input type='email' {...register("email")} placeholder='예: marketkurly@kurly.com' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>휴대폰</span>
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <input type='number' {...register("contact", { required: true })} placeholder='숫자만 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                        <input type='number' {...register("contact")} placeholder='숫자만 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-
-                                    <button className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>인증번호 받기</button>
+                                    <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>인증번호 받기</button>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>주소</span>
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <button className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
+                                        <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
                                             <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
                                             <span>주소 검색</span>
                                         </button>
@@ -114,34 +122,34 @@ const Join: NextPage = () => {
                             <div className={`flex-1 flex flex-col items-start space-y-3`}>
                                 <div className='w-full flex flex-col items-start'>
                                     <div className={`${className.ROW} !justify-start mb-1`}>
-                                        <span className={`${className.CHECK_BUTTON}`}><FontAwesomeIcon icon={faCircle} /></span>
+                                        <AgreeButton fieldName='agree_all' {...{ 'register': { ...register('agree_all') }, setValue, needed: true }} />
                                         <span className='text-lg font-semibold'>전체 동의합니다.</span>
                                     </div>
                                     <span className='ml-9 text-xs'>선택항목에 동의하지 않은 경우도 회원가입 및 일반적인 서비스를 이용할 수 있습니다.</span>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <span className={`${className.CHECK_BUTTON}`}><FontAwesomeIcon icon={faCircle} /></span>
+                                    <AgreeButton fieldName='agree_1' {...{ 'register': { ...register('agree_1') }, setValue, needed: true }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span>이용약관 동의 <span className='text-kurly-grey'>(필수)</span></span>
-                                        <button className='text-kurly-purple'>{'약관보기 >'}</button>
+                                        <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <span className={`${className.CHECK_BUTTON}`}><FontAwesomeIcon icon={faCircle} /></span>
+                                    <AgreeButton fieldName='agree_2' {...{ 'register': { ...register('agree_2') }, setValue, needed: true }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(필수)</span></span>
-                                        <button className='text-kurly-purple'>{'약관보기 >'}</button>
+                                        <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <span className={`${className.CHECK_BUTTON}`}><FontAwesomeIcon icon={faCircle} /></span>
+                                    <AgreeButton fieldName='agree_option' {...{ 'register': { ...register('agree_option') }, setValue, needed: false }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(선택)</span></span>
-                                        <button className='text-kurly-purple'>{'약관보기 >'}</button>
+                                        <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <span className={`${className.CHECK_BUTTON}`}><FontAwesomeIcon icon={faCircle} /></span>
+                                    <AgreeButton fieldName='agree_3' {...{ 'register': { ...register('agree_3') }, setValue, needed: true }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span> 본인은 만 14세 이상입니다. <span className='text-kurly-grey'>(필수)</span></span>
                                     </div>
@@ -153,6 +161,22 @@ const Join: NextPage = () => {
                 </div>
             </div>
         </div>
+    )
+}
+
+const AgreeButton = (props: { [key: string]: any, fieldName: string }) => {
+    const { fieldName, ...rest } = props;
+    const changeAgreeState: UseFormSetValue<IForm> = rest?.setValue;
+    const [isAgreed, setIsAgreed] = useState(false);
+    //useEffect(() => {
+    //    changeAgreeState(fieldName, isAgreed);
+    //}, [isAgreed]);
+
+    const agreeCheck = () => setIsAgreed(prev => !prev);
+    return (
+        <button type={'button'} {...rest.register} onClick={() => agreeCheck()} className='mr-3 text-2xl'>
+            {isAgreed ? <FontAwesomeIcon icon={faCircleCheck} /> : <FontAwesomeIcon icon={faCircle} />}
+        </button>
     )
 }
 
