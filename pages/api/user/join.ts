@@ -6,7 +6,6 @@ import bcrypt from 'bcryptjs';
 async function join(req: NextApiRequest, res: NextApiResponse) {
     const { userId, password, name, email, contact, address } = await req.body;
     const hashPassword = await bcrypt.hash(password, 10);
-    console.log("try create user")
     try {
         const newUser = await client.user.create({
             data: {
@@ -18,12 +17,10 @@ async function join(req: NextApiRequest, res: NextApiResponse) {
                 address: address || ''
             }
         });
-        console.log(newUser);
 
         req.session.user = { id: newUser.id };
         await req.session.save();
 
-        console.log("user create is successful");
         res.json({
             ok: true
         })

@@ -4,7 +4,7 @@ import carousel from "@libs/carousel";
 import MoveCarouselButton from "../MoveCarouselButton";
 import Ad from "./AutoMoveAd";
 
-export default function () {
+export default function AdContainer() {
     const [salePromoIndex, setSalePromoIndex] = useState(1);
     const [salePromoWidth, setSalePromoWidth] = useState(0);
     const [autoMoveTimeout, setAutoMoveTimeout] = useState<NodeJS.Timeout | null>(null);
