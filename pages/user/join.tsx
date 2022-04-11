@@ -3,12 +3,12 @@ import { faCircle, faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
 import { FieldErrors, useForm, UseFormSetValue } from 'react-hook-form';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useCallApi from '@libs/useCallApi';
-import useSWR from 'swr';
 import { useRouter } from 'next/router';
 
 interface IForm {
+    [key: string]: any,
     userId: string,
     password: string,
     password_confirm: string,
@@ -19,20 +19,23 @@ interface IForm {
 }
 const Join: NextPage = () => {
     const router = useRouter();
+    const [openIdValidateText, setOpenIdValidateText] = useState(false);
+    const [openPasswordValidateText, setOpenPasswordValidateText] = useState(false);
     const [createUser, { data }] = useCallApi({ url: '/api/user/join', method: 'POST' });
-    const { setValue, register, handleSubmit, formState: { errors } } = useForm<IForm>({ mode: 'onChange' });
-    const onSubmit = (data: IForm) => {
-        console.log(data);
-        createUser(data);
-    }
-    const onSubmitFailed = (error: FieldErrors<IForm>) => {
-        console.log(error);
-    }
+    const { setValue, setError, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
+    const userId = useRef({});
+    const password = useRef({});
+    const passwordConfirm = useRef({});
+    userId.current = watch('userId', '');
+    password.current = watch('password', '');
+    passwordConfirm.current = watch('password_confirm', '');
+
+    const onSubmit = (data: IForm) => createUser(data)
+    const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error)
     useEffect(() => {
         if (!data?.ok) return;
-        console.log("User Create is completed!");
         router.push('/');
-    }, [data])
+    }, [data]);
     const className = {
         ROW: 'w-full flex justify-between items-center',
         LABEL: 'w-[23%] font-semibold',
@@ -42,8 +45,7 @@ const Join: NextPage = () => {
         INPUT: 'px-4 w-full',
         DATA_CONFIRM_BUTTON: 'ml-2 flex-1 border-kurly-purple text-kurly-purple font-semibold',
         CHECK_AREA_CHILD: 'flex-1 flex justify-between items-center',
-        REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5',
-        DEFAULT_ERROR_MESSAGE: `${!errors || !errors.userId && '!text-black'}`
+        REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5'
     }
     return (
         <div className='w-full flex justify-center items-center'>
@@ -57,29 +59,42 @@ const Join: NextPage = () => {
                                 <span className={`${className.LABEL}`}>아이디<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA} w-full`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <input {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                        <input onClick={() => setOpenIdValidateText(true)} {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
                                     <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
-                            {/*
-                            <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
-                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.userId?.type === 'minLength' ? 'text-red-500' : (errors?.userId?.type === 'required' ? 'text-red-500' : 'text-green-500')}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
-                                <span className={`${className.DEFAULT_ERROR_MESSAGE} ${errors?.userId?.type === 'required' ? 'text-red-500' : 'text-green-500'}`}>아이디 중복확인</span>
-                            </div>
-                            */}
+                            {openIdValidateText === true && (
+                                <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
+                                    <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
+                                    <span>아이디 중복확인</span>
+                                </div>
+                            )}
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password", { required: true, minLength: 6 })} placeholder='비밀번호를 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password", { required: true, minLength: 10, validate: value => value === passwordConfirm.current })} placeholder='비밀번호를 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호확인<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password_confirm", { required: true, minLength: 6 })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => setOpenPasswordValidateText(true)} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
+                            {openPasswordValidateText === true && (
+                                <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
+                                    <span className={
+                                        `${(
+                                            passwordConfirm.current.toString().length === 0
+                                            || errors.hasOwnProperty('password')
+                                            || errors.hasOwnProperty('password_confirm')
+                                            || (password.current !== passwordConfirm.current)
+                                        ) ? 'text-red-500' : 'text-green-500'
+                                        }`
+                                    }>동일한 비밀번호를 입력해주세요.</span>
+                                </div>
+                            )}
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>이름<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
