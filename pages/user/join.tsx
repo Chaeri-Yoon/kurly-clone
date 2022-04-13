@@ -6,6 +6,8 @@ import { FieldErrors, useForm, UseFormSetValue } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
 import useCallApi from '@libs/useCallApi';
 import { useRouter } from 'next/router';
+import SearchAddress from '@components/Address';
+import Popup from 'reactjs-popup';
 
 interface IForm {
     [key: string]: any,
@@ -21,8 +23,9 @@ const Join: NextPage = () => {
     const router = useRouter();
     const [openIdValidateText, setOpenIdValidateText] = useState(false);
     const [openPasswordValidateText, setOpenPasswordValidateText] = useState(false);
+    const [address, setAddress] = useState('');
     const [createUser, { data }] = useCallApi({ url: '/api/user/join', method: 'POST' });
-    const { setValue, setError, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
+    const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
     const userId = useRef({});
     const password = useRef({});
     const passwordConfirm = useRef({});
@@ -30,6 +33,7 @@ const Join: NextPage = () => {
     password.current = watch('password', '');
     passwordConfirm.current = watch('password_confirm', '');
 
+    const updateAddressValue = (event: React.ChangeEvent<HTMLFormElement>) => setAddress(event.target.value)
     const onSubmit = (data: IForm) => createUser(data)
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error)
     useEffect(() => {
@@ -79,7 +83,7 @@ const Join: NextPage = () => {
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호확인<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => setOpenPasswordValidateText(true)} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => setOpenPasswordValidateText(true)} onFocus={() => setOpenPasswordValidateText(true)} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
                             {openPasswordValidateText === true && (
@@ -123,11 +127,28 @@ const Join: NextPage = () => {
                                 <span className={`${className.LABEL}`}>주소</span>
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
-                                            <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
-                                            <span>주소 검색</span>
-                                        </button>
+                                        {address.length === 0 ? (
+                                            <Popup trigger={
+                                                <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
+                                                    <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
+                                                    <span>주소 검색</span>
+                                                </button>} modal>
+                                                <SearchAddress setAddress={setAddress} />
+                                            </Popup>
+                                        ) : (
+                                            <>
+                                                <input readOnly value={address} {...register("address", { onChange: updateAddressValue })} className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                                <Popup trigger={
+                                                    <button type={'button'}>
+                                                        <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
+                                                        <span>재검색</span>
+                                                    </button>} modal>
+                                                    <SearchAddress setAddress={setAddress} />
+                                                </Popup>
+                                            </>
+                                        )}
                                     </div>
+
                                 </div>
 
                             </div>
