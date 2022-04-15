@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faMagnifyingGlass, faLocationDot, faHeart, faCartShopping, faCarrot, faAppleWhole, faFish, faDrumstickBite, faBowlingBall, faBreadSlice, faSeedling, faWineBottle, faOilCan, faMugHot, faMugSaucer, faCookieBite } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import Link from 'next/link';
 
 const styleNavList = 'py-1 border-b border-transparent hover:text-kurly-purple cursor-pointer cursor-pointer text-kurly-black ';
 const DropdownList = ({ icon, text }: { icon: IconProp, text: string }) => {
@@ -52,7 +53,7 @@ export default function () {
                     <ul className='py-2 flex justify-end items-center space-x-5 text-3xl'>
                         <li className='flex justify-center items-center'><FontAwesomeIcon icon={faLocationDot} className='cursor-pointer' /></li>
                         <li className='flex justify-center items-center'><FontAwesomeIcon icon={faHeart} className='cursor-pointer' /></li>
-                        <li className='flex justify-center items-center'><FontAwesomeIcon icon={faCartShopping} className='cursor-pointer' /></li>
+                        <Link href={'/user/cart'}><li className='flex justify-center items-center'><FontAwesomeIcon icon={faCartShopping} className='cursor-pointer' /></li></Link>
                     </ul>
                 </nav>
             </div>

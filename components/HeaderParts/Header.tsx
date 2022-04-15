@@ -41,3 +41,5 @@ export default function () {
         </header>
     )
 }
+// ***** To be dealt with *****
+// If the user is logged in, display the name of logged user instead of showing join and login button. 
