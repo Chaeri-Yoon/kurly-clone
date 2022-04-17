@@ -52,7 +52,7 @@ const Join: NextPage = () => {
         REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5'
     }
     return (
-        <div className='w-full flex justify-center items-center'>
+        <div className='p-5 pt-1 w-full flex justify-center items-center'>
             <div className='w-full flex flex-col items-center'>
                 <span className='pt-11 text-[1.75rem] font-semibold'>회원가입</span>
                 <div className='w-[55%] max-w-[640px] flex flex-col items-center'>

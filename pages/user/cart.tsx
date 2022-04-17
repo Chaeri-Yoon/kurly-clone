@@ -68,6 +68,5 @@ const SelectDeleteProduct = () => {
 export default Cart;
 
 // ***** To be dealt with *****
-// - Redirect to homepage if there is no data inside req.session.user.
-// - Find datas on the products which the logged user has added to the cart.
+// - If there is data inside req.session.user, display the list of products added by the logged user.
 // - Find data on the shipping address registered when the logged user signed up.
