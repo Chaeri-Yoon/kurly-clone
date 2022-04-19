@@ -2,7 +2,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { faCircle, faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
-import { FieldErrors, useForm, UseFormSetValue } from 'react-hook-form';
+import { FieldErrors, useForm } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
 import useCallApi from '@libs/useCallApi';
 import { useRouter } from 'next/router';
@@ -17,7 +17,7 @@ interface IForm {
     name: string,
     email?: string,
     contact?: string,
-    address?: string
+    address?: string,
 }
 const Join: NextPage = () => {
     const router = useRouter();
@@ -29,13 +29,15 @@ const Join: NextPage = () => {
     const userId = useRef({});
     const password = useRef({});
     const passwordConfirm = useRef({});
+    const agreeAll = useRef({});
     userId.current = watch('userId', '');
     password.current = watch('password', '');
     passwordConfirm.current = watch('password_confirm', '');
+    agreeAll.current = watch('agree_all');
 
-    const updateAddressValue = (event: React.ChangeEvent<HTMLFormElement>) => setAddress(event.target.value)
-    const onSubmit = (data: IForm) => createUser(data)
-    const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error)
+    const updateAddressValue = (event: React.ChangeEvent<HTMLFormElement>) => setAddress(event.target.value);
+    const onSubmit = (data: IForm) => createUser(data);
+    const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
         if (!data?.ok) return;
         router.push('/');
@@ -91,8 +93,8 @@ const Join: NextPage = () => {
                                     <span className={
                                         `${(
                                             passwordConfirm.current.toString().length === 0
-                                            || errors.hasOwnProperty('password')
-                                            || errors.hasOwnProperty('password_confirm')
+                                            || errors?.password?.type === 'minLength'
+                                            || errors?.password_confirm?.type === 'minLength'
                                             || (password.current !== passwordConfirm.current)
                                         ) ? 'text-red-500' : 'text-green-500'
                                         }`
@@ -148,9 +150,7 @@ const Join: NextPage = () => {
                                             </>
                                         )}
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
                         <div className='p-5 w-full flex justify-center items-start text-sm border-b'>
@@ -158,34 +158,34 @@ const Join: NextPage = () => {
                             <div className={`flex-1 flex flex-col items-start space-y-3`}>
                                 <div className='w-full flex flex-col items-start'>
                                     <div className={`${className.ROW} !justify-start mb-1`}>
-                                        <AgreeButton fieldName='agree_all' {...{ 'register': { ...register('agree_all') }, setValue, needed: true }} />
+                                        <AgreeButton fieldName='agree_all' {...{ 'register': { ...register('agree_all', { validate: value => value === true }) } }} />
                                         <span className='text-lg font-semibold'>전체 동의합니다.</span>
                                     </div>
-                                    <span className='ml-9 text-xs'>선택항목에 동의하지 않은 경우도 회원가입 및 일반적인 서비스를 이용할 수 있습니다.</span>
+                                    <span className='ml-[1.6rem] text-xs'>선택항목에 동의하지 않은 경우도 회원가입 및 일반적인 서비스를 이용할 수 있습니다.</span>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_1' {...{ 'register': { ...register('agree_1') }, setValue, needed: true }} />
+                                    <AgreeButton fieldName='agree_1' {...{ 'register': { ...register('agree_1', { validate: value => value === true }) }, setValue, agreeAll }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span>이용약관 동의 <span className='text-kurly-grey'>(필수)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_2' {...{ 'register': { ...register('agree_2') }, setValue, needed: true }} />
+                                    <AgreeButton fieldName='agree_2' {...{ 'register': { ...register('agree_2', { validate: value => value === true }) }, setValue, agreeAll }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(필수)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_option' {...{ 'register': { ...register('agree_option') }, setValue, needed: false }} />
+                                    <AgreeButton fieldName='agree_option' {...{ 'register': { ...register('agree_option') }, setValue }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(선택)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_3' {...{ 'register': { ...register('agree_3') }, setValue, needed: true }} />
+                                    <AgreeButton fieldName='agree_3' {...{ 'register': { ...register('agree_3', { validate: value => value === true }) }, setValue, agreeAll }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span> 본인은 만 14세 이상입니다. <span className='text-kurly-grey'>(필수)</span></span>
                                     </div>
@@ -202,17 +202,22 @@ const Join: NextPage = () => {
 
 const AgreeButton = (props: { [key: string]: any, fieldName: string }) => {
     const { fieldName, ...rest } = props;
-    const changeAgreeState: UseFormSetValue<IForm> = rest?.setValue;
+    const { setValue, agreeAll } = rest;
     const [isAgreed, setIsAgreed] = useState(false);
-    //useEffect(() => {
-    //    changeAgreeState(fieldName, isAgreed);
-    //}, [isAgreed]);
+    const changeAgreeState = (changedByAgreeAll = false) => changedByAgreeAll ? setIsAgreed(agreeAll?.current) : setIsAgreed(prev => !prev);
+    useEffect(() => {
+        if (fieldName === 'agree_all') return;
+        changeAgreeState(true);
+        setValue(fieldName, agreeAll?.current);
+    }, [agreeAll?.current])
 
-    const agreeCheck = () => setIsAgreed(prev => !prev);
     return (
-        <button type={'button'} {...rest.register} onClick={() => agreeCheck()} className='mr-3 text-2xl'>
-            {isAgreed ? <FontAwesomeIcon icon={faCircleCheck} /> : <FontAwesomeIcon icon={faCircle} />}
-        </button>
+        <>
+            <input type='checkbox' id={fieldName} onClick={() => changeAgreeState()} {...rest.register} className='mr-3 relative text-2xl' />
+            <label htmlFor={fieldName} className='absolute bg-white'>
+                <FontAwesomeIcon icon={isAgreed ? faCircleCheck : faCircle} className='' />
+            </label>
+        </>
     )
 }
 
