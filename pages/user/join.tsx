@@ -15,33 +15,57 @@ interface IForm {
     password: string,
     password_confirm: string,
     name: string,
-    email?: string,
+    email: string,
     contact?: string,
     address?: string,
 }
 const Join: NextPage = () => {
     const router = useRouter();
-    const [openIdValidateText, setOpenIdValidateText] = useState(false);
-    const [openPasswordValidateText, setOpenPasswordValidateText] = useState(false);
     const [address, setAddress] = useState('');
-    const [createUser, { data }] = useCallApi({ url: '/api/user/join', method: 'POST' });
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
+
+    // To fetch data
+    const [createUser, { data: createUserData }] = useCallApi({ url: '/api/user/join', method: 'POST' });
+    const [checkExist, { data: checkExistData }] = useCallApi({ url: '/api/user/dataExist', method: 'POST' });
+
+    // To open validation.
+    const idValidateArea: React.MutableRefObject<any> = useRef();
+    const passwordValidateArea: React.MutableRefObject<any> = useRef(null);
+
+    const openValidateArea = (openArea: string) => {
+        if (openArea === 'id') idValidateArea.current.style.display = 'flex';
+        else passwordValidateArea.current.style.display = 'flex';
+    }
+
+    // To detect any change in the value of certain fields.
     const userId = useRef({});
     const password = useRef({});
     const passwordConfirm = useRef({});
+    const email = useRef({});
     const agreeAll = useRef({});
     userId.current = watch('userId', '');
     password.current = watch('password', '');
     passwordConfirm.current = watch('password_confirm', '');
+    email.current = watch('email', '');
     agreeAll.current = watch('agree_all');
 
     const updateAddressValue = (event: React.ChangeEvent<HTMLFormElement>) => setAddress(event.target.value);
+
+    // Handle events involving fetching data and some work related to its response.
+    const onCheckExist = (data: { [key: string]: any }) => checkExist(data);
     const onSubmit = (data: IForm) => createUser(data);
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
-        if (!data?.ok) return;
+        if (!createUserData?.ok) return;
         router.push('/');
-    }, [data]);
+    }, [createUserData]);
+    useEffect(() => {
+        if (!checkExistData?.ok) return;
+        if (!checkExistData?.isIdExist && !checkExistData?.isEmailExist) alert('사용이 가능합니다');
+        else alert(`이미 등록된 ${checkExistData?.isIdExist ? '아이디' : '이메일'}입니다`);
+    }, [checkExistData])
+
+    // To make it easier for common styles to access to classNames.
     const className = {
         ROW: 'w-full flex justify-between items-center',
         LABEL: 'w-[23%] font-semibold',
@@ -65,17 +89,16 @@ const Join: NextPage = () => {
                                 <span className={`${className.LABEL}`}>아이디<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA} w-full`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <input onClick={() => setOpenIdValidateText(true)} {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                        <input onClick={() => openValidateArea('id')} {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} onClick={() => onCheckExist({ userId: userId.current })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
-                            {openIdValidateText === true && (
-                                <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
-                                    <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
-                                    <span>아이디 중복확인</span>
-                                </div>
-                            )}
+                            <div className='ml-[8.7rem] self-start hidden flex-col items-start text-xs' ref={idValidateArea}>
+                                <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
+                                <span className={`${!checkExistData ? 'text-black' : ((checkExistData?.isIdExist || !checkExistData?.ok) ? 'text-red-500' : 'text-green-500')}`}>아이디 중복확인</span>
+                            </div>
+                            {console.log(errors)}
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
@@ -85,22 +108,20 @@ const Join: NextPage = () => {
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호확인<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => setOpenPasswordValidateText(true)} onFocus={() => setOpenPasswordValidateText(true)} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => openValidateArea('password')} onFocus={() => openValidateArea('password')} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
                                 </div>
                             </div>
-                            {openPasswordValidateText === true && (
-                                <div className='ml-[8.7rem] self-start flex flex-col items-start text-xs'>
-                                    <span className={
-                                        `${(
-                                            passwordConfirm.current.toString().length === 0
-                                            || errors?.password?.type === 'minLength'
-                                            || errors?.password_confirm?.type === 'minLength'
-                                            || (password.current !== passwordConfirm.current)
-                                        ) ? 'text-red-500' : 'text-green-500'
-                                        }`
-                                    }>동일한 비밀번호를 입력해주세요.</span>
-                                </div>
-                            )}
+                            <div className='ml-[8.7rem] self-start hidden flex-col items-start text-xs' ref={passwordValidateArea}>
+                                <span className={
+                                    `${(
+                                        passwordConfirm.current.toString().length === 0
+                                        || errors?.password?.type === 'minLength'
+                                        || errors?.password_confirm?.type === 'minLength'
+                                        || (password.current !== passwordConfirm.current)
+                                    ) ? 'text-red-500' : 'text-green-500'
+                                    }`
+                                }>동일한 비밀번호를 입력해주세요.</span>
+                            </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>이름<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
@@ -113,7 +134,7 @@ const Join: NextPage = () => {
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         <input type='email' {...register("email")} placeholder='예: marketkurly@kurly.com' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} onClick={() => onCheckExist({ email: email.current })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
