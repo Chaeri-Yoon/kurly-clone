@@ -23,8 +23,8 @@ export default function () {
                         <li className={`${styleNavList} text-left py-3 group`}>
                             <FontAwesomeIcon icon={faBars} />
                             <span className='inline-block ml-3 text-inherit'>전체 카테고리</span>
-                            <div className="hidden absolute justify-center top-full h-[276px] overflow-y-scroll w-1/3 border border-t-0 bg-white z-[100] group-hover:flex hover:flex">
-                                <ul className='py-2 w-full flex flex-col items-start space-y-5'>
+                            <div className="hidden absolute justify-center top-full h-[276px]  w-1/3 z-[100] group-hover:flex hover:flex">
+                                <ul className='top-2 absolute py-2 w-full flex flex-col items-start space-y-5 overflow-y-scroll border border-t-0 bg-white  '>
                                     <DropdownList icon={faCarrot} text="채소" />
                                     <DropdownList icon={faAppleWhole} text="과일·견과·쌀" />
                                     <DropdownList icon={faFish} text="수산·해산·건어물" />

@@ -1,7 +1,7 @@
 import client from "@libs/server/client";
 import { NextApiRequest, NextApiResponse } from "next"
 
-export default async function isIdExist(req: NextApiRequest, res: NextApiResponse) {
+export default async function (req: NextApiRequest, res: NextApiResponse) {
     const { body: { userId, email } } = req;
     try {
         const user = await client.user.findFirst({

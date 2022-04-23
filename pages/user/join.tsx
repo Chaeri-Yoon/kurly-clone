@@ -4,10 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
 import { FieldErrors, useForm } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
-import useCallApi from '@libs/useCallApi';
+import useCallApi from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
 import SearchAddress from '@components/Address';
 import Popup from 'reactjs-popup';
+import { useSWRConfig } from 'swr';
 
 interface IForm {
     [key: string]: any,
@@ -20,6 +21,7 @@ interface IForm {
     address?: string,
 }
 const Join: NextPage = () => {
+    const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const [address, setAddress] = useState('');
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
@@ -57,6 +59,7 @@ const Join: NextPage = () => {
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
         if (!createUserData?.ok) return;
+        loggedMutate('/api/user');
         router.push('/');
     }, [createUserData]);
     useEffect(() => {
@@ -98,7 +101,6 @@ const Join: NextPage = () => {
                                 <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
                                 <span className={`${!checkExistData ? 'text-black' : ((checkExistData?.isIdExist || !checkExistData?.ok) ? 'text-red-500' : 'text-green-500')}`}>아이디 중복확인</span>
                             </div>
-                            {console.log(errors)}
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>

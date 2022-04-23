@@ -1,8 +1,8 @@
 import { Product as ProductData } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import carousel from "@libs/carousel";
-import classAppend from "@libs/classAppend";
+import carousel from "@libs/client/carousel";
+import classAppend from "@libs/client/classAppend";
 import MoveCarouselButton from "../MoveCarouselButton"
 import Product from "./Product"
 

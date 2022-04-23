@@ -1,9 +1,9 @@
 import client from "@libs/server/client";
-import withApiSession from "@libs/withSession";
+import withApiSession from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from 'bcryptjs';
 
-async function join(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { userId, password, name, email, contact, address } = await req.body;
     const hashPassword = await bcrypt.hash(password, 10);
     try {
@@ -18,7 +18,7 @@ async function join(req: NextApiRequest, res: NextApiResponse) {
             }
         });
 
-        req.session.user = { id: newUser.id };
+        req.session.user = { id: newUser.id, name: newUser.name };
         await req.session.save();
 
         res.json({
@@ -29,4 +29,4 @@ async function join(req: NextApiRequest, res: NextApiResponse) {
         res.status(500).json({ ok: false });
     }
 }
-export default withApiSession(join);
+export default withApiSession(handler);

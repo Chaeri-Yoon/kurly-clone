@@ -13,5 +13,4 @@ function MyApp({ Component, pageProps }: AppProps) {
     </SWRConfig>
   )
 }
-
 export default MyApp

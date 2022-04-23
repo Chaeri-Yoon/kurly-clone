@@ -5,8 +5,19 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import NavBar from "./NavBar";
 import Link from "next/link";
+import { ILoggedUser } from 'pages/api/user';
+import useCallApi from "@libs/client/useCallApi";
+import { useEffect } from "react";
+import { useSWRConfig } from "swr";
 
-export default function () {
+export default function ({ loggedUser }: { loggedUser?: ILoggedUser }) {
+    const { mutate: loggedMutate } = useSWRConfig();
+    const [logout, { data }] = useCallApi({ url: '/api/user/logout', method: 'GET' });
+    const onLogout = () => logout();
+    useEffect(() => {
+        if (!data?.ok) return;
+        loggedMutate('/api/user');
+    }, [data]);
     return (
         <header className="text-kurly-black">
             <div className="relative w-full py-3 px-[6.3rem] flex justify-center items-center space-x-2 bg-kurly-purple  ">
@@ -28,10 +39,34 @@ export default function () {
                         <Link href='/'><a><Image src='/kurly-logo.webp' layout="fill"></Image></a></Link>
                     </div>
                 </div>
-                <div className="w-1/3 flex justify-end items-center divide-x ">
-                    <Link href='/user/join'><a className="px-2">회원가입</a></Link>
-                    <Link href='/user/login'><a className="px-2">로그인</a></Link>
-                    <a className="px-2">
+                <div className="w-1/3 flex justify-end items-center">
+                    {loggedUser ? (
+                        <>
+                            <a className="flex flex-col items-center relative group">
+                                <div className="flex justify-start items-center">
+                                    <span className="px-2 text-kurly-purple border border-kurly-purple rounded-full text-[10px]">일반</span>
+                                    <div className="flex justify-center items-center">
+                                        <span className="px-[0.1rem]">{loggedUser.name}</span>
+                                        <span>님</span>
+                                    </div>
+                                    <button><FontAwesomeIcon icon={faCaretDown} className="ml-1" /></button>
+                                </div>
+                                <div className="pl-2 w-full h-full top-full absolute hidden justify-start items-center group-hover:flex hover:flex">
+                                    <ul className="p-2 top-2 absolute w-full flex flex-col items-start border border-solid">
+                                        <button onClick={() => onLogout()}><li>로그아웃</li></button>
+                                    </ul>
+                                </div>
+                            </a>
+                        </>
+                    ) : (
+                        <>
+                            <Link href='/user/join'>회원가입</Link>
+                            <span className="px-2 text-kurly-grey opacity-30">|</span>
+                            <Link href='/user/login'>로그인</Link>
+                        </>
+                    )}
+                    <a className="flex justify-center items-center">
+                        <span className="px-2 text-kurly-grey opacity-30">|</span>
                         <span>고객센터</span>
                         <button><FontAwesomeIcon icon={faCaretDown} className="ml-1" /></button>
                     </a>
@@ -41,5 +76,3 @@ export default function () {
         </header>
     )
 }
-// ***** To be dealt with *****
-// If the user is logged in, display the name of logged user instead of showing join and login button. 

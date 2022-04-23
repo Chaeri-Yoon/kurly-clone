@@ -4,7 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 declare module "iron-session" {
     interface IronSessionData {
         user?: {
-            id: number;
+            id: number,
+            name: string
         }
     }
 }

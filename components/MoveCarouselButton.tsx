@@ -1,6 +1,6 @@
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import classAppend from "@libs/classAppend";
+import classAppend from "@libs/client/classAppend";
 
 interface IMoveCarouselButton {
     isLeft: boolean;

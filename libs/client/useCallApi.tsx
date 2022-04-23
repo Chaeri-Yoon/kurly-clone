@@ -10,14 +10,14 @@ interface ICallApiState {
     error?: object;
 }
 
-export default function ({ url, method }: ICallApiArgs): [(data: any) => void, ICallApiState] {
+export default function ({ url, method }: ICallApiArgs): [(data?: any) => void, ICallApiState] {
     const [state, setState] = useState<ICallApiState>({
         loading: false,
         data: undefined,
         error: undefined
     })
 
-    function callApi(_data: any) {
+    function callApi(_data?: any) {
         fetch(url, {
             method,
             body: JSON.stringify(_data),
