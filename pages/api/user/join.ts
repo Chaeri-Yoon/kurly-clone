@@ -1,16 +1,18 @@
 import client from "@libs/server/client";
 import withApiSession from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
-import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { userId, password, name, email, contact, address } = await req.body;
-    const hashPassword = await bcrypt.hash(password, 10);
+    const { body: { userId, password, name, email, contact, address } } = await req;
+    const salt = crypto.randomBytes(16).toString('hex')
+    const hashPassword = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
     try {
         const newUser = await client.user.create({
             data: {
                 userId,
                 password: hashPassword,
+                salt,
                 name,
                 email: email || '',
                 contact: contact || '',

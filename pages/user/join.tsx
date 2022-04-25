@@ -131,7 +131,7 @@ const Join: NextPage = () => {
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
-                                <span className={`${className.LABEL}`}>이메일</span>
+                                <span className={`${className.LABEL}`}>이메일<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         <input type='email' {...register("email")} placeholder='예: marketkurly@kurly.com' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
