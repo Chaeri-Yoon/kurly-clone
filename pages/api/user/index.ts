@@ -1,4 +1,4 @@
-import withApiSession from "@libs/server/withSession";
+import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export interface ILoggedUser {

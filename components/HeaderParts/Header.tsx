@@ -9,14 +9,17 @@ import { ILoggedUser } from 'pages/api/user';
 import useCallApi from "@libs/client/useCallApi";
 import { useEffect } from "react";
 import { useSWRConfig } from "swr";
+import { useRouter } from "next/router";
 
 export default function ({ loggedUser }: { loggedUser?: ILoggedUser }) {
+    const router = useRouter();
     const { mutate: loggedMutate } = useSWRConfig();
     const [logout, { data }] = useCallApi({ url: '/api/user/logout', method: 'GET' });
     const onLogout = () => logout();
     useEffect(() => {
         if (!data?.ok) return;
         loggedMutate('/api/user');
+        router.push('/');
     }, [data]);
     return (
         <header className="text-kurly-black">

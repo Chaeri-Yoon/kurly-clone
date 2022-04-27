@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import useSWR from "swr";
 import carousel from "@libs/client/carousel";
 import MoveCarouselButton from "../MoveCarouselButton";
 import Ad from "./AutoMoveAd";
 
-export default function AdContainer() {
+interface IAdContainerProps {
+    salePromoImages: string[]
+}
+export default function AdContainer({ salePromoImages }: IAdContainerProps) {
     const [salePromoIndex, setSalePromoIndex] = useState(1);
     const [salePromoWidth, setSalePromoWidth] = useState(0);
     const [autoMoveTimeout, setAutoMoveTimeout] = useState<NodeJS.Timeout | null>(null);
     const salePromoFrame = useRef<HTMLUListElement | null>(null);
-    const { data: salePromoImages } = useSWR('/api/salePromoImages');
 
     const { initialSetting, rotateItem, onClickedBack, onClickedNext } = carousel({
         itemIndex: salePromoIndex,
@@ -19,7 +20,7 @@ export default function AdContainer() {
         autoMoveTimeout,
         setAutoMoveTimeout,
         frame: salePromoFrame,
-        itemsLength: salePromoImages?.filenames.length,
+        itemsLength: salePromoImages.length,
         defaultTransitionTime: 0.4
     });
     useEffect(initialSetting, []);
@@ -37,8 +38,8 @@ export default function AdContainer() {
             <div className='w-full h-full' >
                 <div className='relative w-full h-full overflow-hidden group'>
                     <ul className='w-full h-full whitespace-nowrap list-none' ref={salePromoFrame}>
-                        {salePromoImages?.filenames.map((imageUrl: string, i: number) => (
-                            <Ad id={i} key={i} imageUrl={imageUrl} arrFilenames={salePromoImages?.filenames} />
+                        {salePromoImages?.map((imageUrl: string, i: number) => (
+                            <Ad id={i} key={i} imageUrl={imageUrl} arrFilenames={salePromoImages} />
                         ))}
                     </ul>
                     <MoveCarouselButton isLeft={true} inverseIconColor={true} opacityStyle={true} onClick={onClickedBack} containerStyle={'left-4'} />

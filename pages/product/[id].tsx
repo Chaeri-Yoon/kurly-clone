@@ -5,6 +5,7 @@ import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
+import fetchRequest from '@libs/client/fetchRequest';
 
 type TPackageType = {
     [index: string]: string
@@ -13,12 +14,10 @@ type TPackageType = {
     ICE_STYROFOAM: string
 }
 interface IProductDetail {
-    product: Product
+    product: Product | null
 }
-const ProductDetail: NextPage = () => {
-    const { query: { id } } = useRouter();
-    const { data } = useSWR<IProductDetail>(`/api/product/${id}`);
-    const saledPrice = data ? (1 - (data.product.salePercentage * 0.01)) * data.product.originalPrice : 0;
+const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
+    const saledPrice = product ? (1 - (product.salePercentage * 0.01)) * product.originalPrice : 0;
     const className = {
         INFO_ROW_CLASS: 'py-[20px] w-full flex items-start border-b',
         LABEL: 'w-[22%] text-kurly-black'
@@ -29,30 +28,30 @@ const ProductDetail: NextPage = () => {
         ICE_STYROFOAM: '냉동/스티로폼'
     }
     return (
-        data ? (
+        product ? (
             <div className='w-full p-[var(--frame-padding)] my-[20px] text-sm'>
                 <div className='w-full flex justify-start items-start'>
                     <div className="w-[41%] mr-[6%] aspect-[429/553] relative">
-                        <Image src={data.product.image} layout="fill"></Image>
+                        <Image src={product.image} layout="fill"></Image>
                     </div>
                     <div className='flex-1 flex flex-col items-start'>
                         <div className='w-full flex flex-col items-start'>
                             <div className='my-[10px] w-full flex justify-between items-start'>
                                 <div className='flex flex-col items-start'>
-                                    <span className='mb-[7px] text-2xl font-semibold'>{data.product.name}</span>
-                                    <span className='text-kurly-grey '>{data.product.description}</span>
+                                    <span className='mb-[7px] text-2xl font-semibold'>{product.name}</span>
+                                    <span className='text-kurly-grey '>{product.description}</span>
                                 </div>
                                 <span className='border-[1.5px] rounded-full w-[40px] h-[40px] flex justify-center items-center'><FontAwesomeIcon icon={faShareNodes} /></span>
                             </div>
                             <div className={`${className.INFO_ROW_CLASS} flex-col space-y-[5px]`}>
-                                {data.product.salePercentage !== 0 && <span>회원할인가</span>}
+                                {product.salePercentage !== 0 && <span>회원할인가</span>}
                                 <div className='mb-[10px] flex justify-start items-center text-3xl'>
                                     <span className='mr-[9px]'>{saledPrice.toLocaleString()}<span className='text-base'> 원</span></span>
-                                    {data.product.salePercentage !== 0 && <span className='text-[#FA622F]'>{data.product.salePercentage}%</span>}
+                                    {product.salePercentage !== 0 && <span className='text-[#FA622F]'>{product.salePercentage}%</span>}
                                 </div>
-                                {data.product.salePercentage !== 0 && (
+                                {product.salePercentage !== 0 && (
                                     <div className='flex justify-start items-center text-kurly-grey'>
-                                        <span className='line-through mr-[5px]'>{data.product.originalPrice.toLocaleString()}원</span>
+                                        <span className='line-through mr-[5px]'>{product.originalPrice.toLocaleString()}원</span>
                                         <span><FontAwesomeIcon icon={faCircleQuestion} /></span>
                                     </div>
                                 )}
@@ -61,11 +60,11 @@ const ProductDetail: NextPage = () => {
                             <div className={`${className.INFO_ROW_CLASS} flex-col`}>
                                 <div className='mb-[20px] w-full flex justify-start items-center'>
                                     <span className={className.LABEL}>판매단위</span>
-                                    <span className=''>{data.product.sellingUnit}</span>
+                                    <span className=''>{product.sellingUnit}</span>
                                 </div>
                                 <div className='w-full flex justify-start items-center'>
                                     <span className={className.LABEL}>중량/용량</span>
-                                    <span className=''>{data.product.weight}</span>
+                                    <span className=''>{product.weight}</span>
                                 </div>
                             </div>
                             <div className={`${className.INFO_ROW_CLASS} justify-start`}>
@@ -75,7 +74,7 @@ const ProductDetail: NextPage = () => {
                             <div className={`${className.INFO_ROW_CLASS} justify-start`}>
                                 <span className={className.LABEL}>포장타입</span>
                                 <div className='flex flex-col items-start'>
-                                    <span className='mb-[5px]'>{packageType[data.product.packageType]}</span>
+                                    <span className='mb-[5px]'>{packageType[product.packageType]}</span>
                                     <span className='text-xs text-kurly-grey'>택배배송은 에코포장이 스티로폼으로 대체됩니다.</span>
                                 </div>
                             </div>
@@ -113,5 +112,14 @@ const ProductDetail: NextPage = () => {
             : <></>
     )
 }
+export async function getServerSideProps({ query: { id } }: { query: { id: string } }) {
+    const response = await fetchRequest({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' })
+        .then(response => response.json());
 
+    return {
+        props: {
+            product: response?.product
+        }
+    }
+}
 export default ProductDetail;

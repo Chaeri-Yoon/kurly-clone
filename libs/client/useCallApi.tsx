@@ -1,12 +1,17 @@
 import { useState } from "react"
+import fetchRequest from "./fetchRequest";
 
 interface ICallApiArgs {
     url: string;
     method: string;
 }
+interface IDataResponse {
+    [key: string]: any,
+    ok: boolean
+}
 interface ICallApiState {
-    loading: boolean;
-    data?: { ok: boolean, [key: string]: any };
+    loading?: boolean;
+    data?: IDataResponse;
     error?: object;
 }
 
@@ -18,13 +23,8 @@ export default function ({ url, method }: ICallApiArgs): [(data?: any) => void, 
     })
 
     function callApi(_data?: any) {
-        fetch(url, {
-            method,
-            body: JSON.stringify(_data),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }).then(response => response.json())
+        fetchRequest({ url, method, data: _data })
+            .then(response => response.json())
             .then(data => setState(prev => ({ ...prev, data })))
             .catch(error => setState(prev => ({ ...prev, error }))).finally(() => setState(prev => ({ ...prev, loading: false })));
     }

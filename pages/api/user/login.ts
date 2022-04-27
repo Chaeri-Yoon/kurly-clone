@@ -1,5 +1,5 @@
 import client from "@libs/server/client";
-import withApiSession from "@libs/server/withSession";
+import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 import crypto from 'crypto';
 
@@ -22,7 +22,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         // Compare password
         const inputPassword = crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex');
-        const match = user.password === inputPassword;
         if (!(user.password === inputPassword)) {
             res.json({
                 ok: true,

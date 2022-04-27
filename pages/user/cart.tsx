@@ -1,7 +1,13 @@
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { NextPage } from 'next'
-const Cart: NextPage = () => {
+import fetchRequest from '@libs/client/fetchRequest';
+import { withGetSessionSsr } from '@libs/server/withSession';
+import type { NextPage } from 'next';
+
+interface ICartProps {
+    address?: string
+}
+const Cart: NextPage<ICartProps> = ({ address }) => {
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
@@ -23,7 +29,7 @@ const Cart: NextPage = () => {
                                 <FontAwesomeIcon icon={faLocationPin} className='mr-[0.3rem]' />
                                 <span>배송지</span>
                             </span>
-                            <span>등록한 주소</span>
+                            {address && <span>{address}</span>}
                             <span className='text-sm text-kurly-purple'>샛별배송</span>
                             <button className='w-full py-2 rounded-md text-xs text-kurly-purple border border-kurly-purple'>배송지 변경</button>
                         </div>
@@ -65,8 +71,26 @@ const SelectDeleteProduct = () => {
         </div>
     )
 }
-export default Cart;
+export const getServerSideProps = withGetSessionSsr(
+    async function getServerSideProps({ req }) {
+        const { session: { user: loggedUser } } = req;
+        if (!loggedUser) {
+            return {
+                props: {
 
+                }
+            }
+        }
+        const response = await fetchRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } })
+            .then(response => response.json());
+        return {
+            props: {
+                address: response?.address
+            },
+        };
+    },
+);
+export default Cart;
 // ***** To be dealt with *****
 // - If there is data inside req.session.user, display the list of products added by the logged user.
-// - Find data on the shipping address registered when the logged user signed up.
+// - If there isn't any data on the shipping address, display the button to put one.

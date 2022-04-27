@@ -1,5 +1,5 @@
 import client from "@libs/server/client";
-import withApiSession from "@libs/server/withSession";
+import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 import crypto from 'crypto';
 
