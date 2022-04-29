@@ -1,11 +1,11 @@
 import type { NextPage } from 'next'
-import { useRouter } from 'next/router'
-import useSWR from 'swr';
 import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
 import fetchRequest from '@libs/client/fetchRequest';
+import useCallApi from '@libs/client/useCallApi';
+import { useEffect } from 'react';
 
 type TPackageType = {
     [index: string]: string
@@ -17,6 +17,8 @@ interface IProductDetail {
     product: Product | null
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
+    const [addProductToCart, { data }] = useCallApi({ url: '/api/cart/addToCart', method: 'POST' });
+    const onAddToCartClicked = () => addProductToCart({ productId: product?.id });
     const saledPrice = product ? (1 - (product.salePercentage * 0.01)) * product.originalPrice : 0;
     const className = {
         INFO_ROW_CLASS: 'py-[20px] w-full flex items-start border-b',
@@ -27,6 +29,15 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
         COOL_STYROFOAM: '냉장/스티로폼',
         ICE_STYROFOAM: '냉동/스티로폼'
     }
+    // For Test
+    useEffect(() => {
+        if (!data?.ok) return;
+        if (data?.message) {
+            console.log(data?.message)
+            return;
+        }
+        console.log(data);
+    }, [data])
     return (
         product ? (
             <div className='w-full p-[var(--frame-padding)] my-[20px] text-sm'>
@@ -102,7 +113,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                             <div className='w-full h-14 flex justify-start items-center space-x-2'>
                                 <button className='h-full aspect-square border rounded-md'><FontAwesomeIcon icon={faHeart} color='#999' size='2x' /></button>
                                 <button className='h-full aspect-square border rounded-md'><FontAwesomeIcon icon={faBell} color='#999' size='2x' /></button>
-                                <button className='h-full flex-1  bg-kurly-purple text-white text-base'>장바구니 담기</button>
+                                <button onClick={() => onAddToCartClicked()} className='h-full flex-1  bg-kurly-purple text-white text-base'>장바구니 담기</button>
                             </div>
                         </div>
                     </div>

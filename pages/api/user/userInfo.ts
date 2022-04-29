@@ -17,7 +17,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             select: {
                 email: true,
                 contact: true,
-                address: true
+                address: true,
+                cartProducts: true
             }
         })
         if (!findUser) {
@@ -29,7 +30,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             ok: true,
             email: findUser.email,
             contact: findUser.contact,
-            address: findUser.address
+            address: findUser.address,
+            cartProducts: findUser.cartProducts
         })
     } catch (error) {
         console.log(error);

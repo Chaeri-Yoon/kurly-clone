@@ -2,12 +2,14 @@ import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import fetchRequest from '@libs/client/fetchRequest';
 import { withGetSessionSsr } from '@libs/server/withSession';
+import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
 
 interface ICartProps {
-    address?: string
+    address?: string,
+    cartProducts?: Product[]
 }
-const Cart: NextPage<ICartProps> = ({ address }) => {
+const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
@@ -75,17 +77,22 @@ export const getServerSideProps = withGetSessionSsr(
     async function getServerSideProps({ req }) {
         const { session: { user: loggedUser } } = req;
         if (!loggedUser) {
-            return {
-                props: {
-
-                }
-            }
+            return { props: {} }
         }
         const response = await fetchRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } })
             .then(response => response.json());
+        const findCartProducts = response?.cartProducts
+            && await fetchRequest(
+                {
+                    url: `${process.env.SERVER_BASEURL}/api/cart/loadCart`
+                    , method: 'POST'
+                    , data: { productIds: response.cartProducts.map((product: Cart) => product.productId) }
+                }
+            ).then(response => response.json());
         return {
             props: {
-                address: response?.address
+                address: response?.address,
+                cartProducts: findCartProducts?.cartProducts
             },
         };
     },
