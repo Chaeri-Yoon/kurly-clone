@@ -1,3 +1,4 @@
+import CartItem from '@components/Cart/CartItem';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import fetchRequest from '@libs/client/fetchRequest';
@@ -16,11 +17,21 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
             <SelectDeleteProduct />
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
-                    <div className='w-full min-h-[257px] flex justify-center items-center border-y border-black'>
-                        {// If there is any product added to the cart, display the list of them
-                            //
-                        }
-                        <span className='w-full text-center text-base'>장바구니에 담긴 상품이 없습니다</span>
+                    <div className='w-full min-h-[257px] flex flex-col items-start border-y border-black'>
+                        <div className='w-full flex flex-col'>
+                            <span className='text-lg'>냉장 상품</span>
+                            <div className='w-full flex flex-col space-y-12'>
+                                {cartProducts?.map((product) =>
+                                    <CartItem
+                                        id={product?.id}
+                                        name={product?.name}
+                                        image={product?.image}
+                                        salePercentage={product?.salePercentage}
+                                        originalPrice={product?.originalPrice}
+                                    />)}
+                            </div>
+                        </div>
+                        {/* <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span> */}
                     </div>
                     <SelectDeleteProduct />
                 </div>
@@ -65,7 +76,7 @@ const SelectDeleteProduct = () => {
     return (
         <div className='my-4 w-full flex justify-start items-center space-x-5 text-sm'>
             <div className=' flex justify-start items-center'>
-                <FontAwesomeIcon icon={faCircleCheck} className='mr-[0.6rem] text-2xl' />
+                <FontAwesomeIcon icon={faCircleCheck} className='mr-[0.6rem] text-2xl text-kurly-purple' />
                 <span>전체선택 (0/0)</span>
             </div>
             <span className='text-kurly-grey text-opacity-20'>|</span>
