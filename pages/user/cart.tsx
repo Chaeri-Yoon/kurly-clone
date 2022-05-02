@@ -1,37 +1,51 @@
+import SearchAddress from '@components/Address';
 import CartItem from '@components/Cart/CartItem';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import fetchRequest from '@libs/client/fetchRequest';
+import useCallApi from '@libs/client/useCallApi';
 import { withGetSessionSsr } from '@libs/server/withSession';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
+import { useEffect, useState } from 'react';
+import Popup from 'reactjs-popup';
 
 interface ICartProps {
     address?: string,
     cartProducts?: Product[]
 }
 const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
+    const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
+    const [setDBShippingAddress, { data: addressData }] = useCallApi({ url: `/api/user/address`, method: 'POST' });
+    useEffect(() => {
+        if (!shippingAddress || shippingAddress === '') return;
+        setDBShippingAddress({ address: shippingAddress });
+    }, [shippingAddress])
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
             <SelectDeleteProduct />
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
-                    <div className='w-full min-h-[257px] flex flex-col items-start border-y border-black'>
-                        <div className='w-full flex flex-col'>
-                            <span className='text-lg'>냉장 상품</span>
-                            <div className='w-full flex flex-col space-y-12'>
-                                {cartProducts?.map((product) =>
-                                    <CartItem
-                                        id={product?.id}
-                                        name={product?.name}
-                                        image={product?.image}
-                                        salePercentage={product?.salePercentage}
-                                        originalPrice={product?.originalPrice}
-                                    />)}
+                    <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
+                        {!cartProducts || cartProducts.length === 0 ? (
+                            <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
+                        ) : (
+                            <div className='w-full flex flex-col'>
+                                <span className='text-lg'>냉장 상품</span>
+                                <div className='w-full flex flex-col space-y-12'>
+                                    {cartProducts?.map((product) =>
+                                        <CartItem
+                                            id={product?.id}
+                                            name={product?.name}
+                                            image={product?.image}
+                                            salePercentage={product?.salePercentage}
+                                            originalPrice={product?.originalPrice}
+                                        />)}
+                                </div>
                             </div>
-                        </div>
-                        {/* <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span> */}
+                        )
+                        }
                     </div>
                     <SelectDeleteProduct />
                 </div>
@@ -42,9 +56,16 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
                                 <FontAwesomeIcon icon={faLocationPin} className='mr-[0.3rem]' />
                                 <span>배송지</span>
                             </span>
-                            {address && <span>{address}</span>}
+                            {shippingAddress && <span>{shippingAddress}</span>}
                             <span className='text-sm text-kurly-purple'>샛별배송</span>
-                            <button className='w-full py-2 rounded-md text-xs text-kurly-purple border border-kurly-purple'>배송지 변경</button>
+                            {shippingAddress === '' && (
+                                <Popup trigger={
+                                    <button className='w-full py-2 rounded-md text-xs text-kurly-purple border border-kurly-purple'>
+                                        배송지 등록
+                                    </button>} modal>
+                                    <SearchAddress setAddress={setShippingAddress} />
+                                </Popup>
+                            )}
                         </div>
                         <div className='w-full p-5 flex justify-center items-center bg-[#FAFAFA]'>
                             <div className='w-1/2 flex flex-col items-start space-y-3'>
