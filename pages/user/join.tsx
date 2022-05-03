@@ -24,6 +24,7 @@ const Join: NextPage = () => {
     const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const [address, setAddress] = useState('');
+    const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
 
     // To fetch data
@@ -40,18 +41,18 @@ const Join: NextPage = () => {
     }
 
     // To detect any change in the value of certain fields.
-    const userId = useRef({});
-    const password = useRef({});
-    const passwordConfirm = useRef({});
-    const email = useRef({});
-    const agreeAll = useRef({});
+    const userId: React.MutableRefObject<any> = useRef({});
+    const password: React.MutableRefObject<any> = useRef({});
+    const passwordConfirm: React.MutableRefObject<any> = useRef({});
+    const email: React.MutableRefObject<any> = useRef({});
+    const agreeAll: React.MutableRefObject<any> = useRef({});
     userId.current = watch('userId', '');
     password.current = watch('password', '');
     passwordConfirm.current = watch('password_confirm', '');
     email.current = watch('email', '');
     agreeAll.current = watch('agree_all');
 
-    const updateAddressValue = (event: React.ChangeEvent<HTMLFormElement>) => setAddress(event.target.value);
+    useEffect(() => setIsAddressPopupOpen(false), [address])
 
     // Handle events involving fetching data and some work related to its response.
     const onCheckExist = (data: { [key: string]: any }) => checkExist(data);
@@ -143,7 +144,7 @@ const Join: NextPage = () => {
                                 <span className={`${className.LABEL}`}>휴대폰</span>
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
-                                        <input type='number' {...register("contact")} placeholder='숫자만 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                        <input type='tel' {...register("contact")} placeholder='숫자만 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
                                     <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>인증번호 받기</button>
                                 </div>
@@ -151,8 +152,8 @@ const Join: NextPage = () => {
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>주소</span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}>
-                                        {address.length === 0 ? (
+                                    {address.length === 0 ? (
+                                        <div className={`${className.INPUT_CONTAINER}`}>
                                             <Popup trigger={
                                                 <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
                                                     <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
@@ -160,19 +161,21 @@ const Join: NextPage = () => {
                                                 </button>} modal>
                                                 <SearchAddress setAddress={setAddress} />
                                             </Popup>
-                                        ) : (
-                                            <>
-                                                <input readOnly value={address} {...register("address", { onChange: updateAddressValue })} className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
-                                                <Popup trigger={
-                                                    <button type={'button'}>
-                                                        <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
-                                                        <span>재검색</span>
-                                                    </button>} modal>
-                                                    <SearchAddress setAddress={setAddress} />
-                                                </Popup>
-                                            </>
-                                        )}
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className={`${className.INPUT_CONTAINER}`}>
+                                                <input className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} readOnly value={address} {...register("address")} />
+                                            </div>
+                                            <button type={'button'} onClick={() => setIsAddressPopupOpen(true)} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
+                                                <span>재검색</span>
+                                            </button>
+                                            <Popup open={isAddressPopupOpen}>
+                                                <SearchAddress setAddress={setAddress} />
+                                            </Popup>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

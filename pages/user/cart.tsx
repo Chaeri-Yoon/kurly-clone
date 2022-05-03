@@ -16,9 +16,11 @@ interface ICartProps {
 }
 const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
     const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
+    const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
     const [setDBShippingAddress, { data: addressData }] = useCallApi({ url: `/api/user/address`, method: 'POST' });
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
+        setIsAddressPopupOpen(false);
         setDBShippingAddress({ address: shippingAddress });
     }, [shippingAddress])
     return (
@@ -56,16 +58,14 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
                                 <FontAwesomeIcon icon={faLocationPin} className='mr-[0.3rem]' />
                                 <span>배송지</span>
                             </span>
-                            {shippingAddress && <span>{shippingAddress}</span>}
+                            <span>{shippingAddress}</span>
                             <span className='text-sm text-kurly-purple'>샛별배송</span>
-                            {shippingAddress === '' && (
-                                <Popup trigger={
-                                    <button className='w-full py-2 rounded-md text-xs text-kurly-purple border border-kurly-purple'>
-                                        배송지 등록
-                                    </button>} modal>
-                                    <SearchAddress setAddress={setShippingAddress} />
-                                </Popup>
-                            )}
+                            <button onClick={() => setIsAddressPopupOpen(true)} className='w-full py-2 rounded-md text-xs text-kurly-purple border border-kurly-purple'>
+                                배송지 {shippingAddress.length === 0 ? '등록' : '변경'}
+                            </button>
+                            <Popup open={isAddressPopupOpen}>
+                                <SearchAddress setAddress={setShippingAddress} />
+                            </Popup>
                         </div>
                         <div className='w-full p-5 flex justify-center items-center bg-[#FAFAFA]'>
                             <div className='w-1/2 flex flex-col items-start space-y-3'>
@@ -130,6 +130,3 @@ export const getServerSideProps = withGetSessionSsr(
     },
 );
 export default Cart;
-// ***** To be dealt with *****
-// - If there is data inside req.session.user, display the list of products added by the logged user.
-// - If there isn't any data on the shipping address, display the button to put one.
