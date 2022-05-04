@@ -1,4 +1,3 @@
-import { IncomingMessage } from "http";
 import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiRequest, NextApiResponse } from "next";
 
@@ -14,7 +13,7 @@ const cookieOptions = {
     cookieName: process.env.COOKIENAME!,
     password: process.env.COOKIEPASSWORD!,
     cookieOptions: {
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production"
     }
 }
 export function withGetSessionSsr<P extends { [key: string]: unknown } = { [key: string]: unknown }>(fn: (context: GetServerSidePropsContext) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>) {

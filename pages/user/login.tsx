@@ -1,4 +1,4 @@
-import useCallApi from '@libs/client/useCallApi';
+import { actionDataRequest } from '@libs/client/useCallApi';
 import type { NextPage } from 'next'
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -15,7 +15,7 @@ const Login: NextPage = () => {
     const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const { register, handleSubmit } = useForm<IForm>();
-    const [login, { data }] = useCallApi({ url: '/api/user/login', method: 'POST' });
+    const [login, { data }] = actionDataRequest({ url: '/api/user/login', method: 'POST' });
 
     const onSubmit = (data: IForm) => login(data);
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);

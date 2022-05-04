@@ -2,8 +2,7 @@ import SearchAddress from '@components/Address';
 import CartItem from '@components/Cart/CartItem';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import fetchRequest from '@libs/client/fetchRequest';
-import useCallApi from '@libs/client/useCallApi';
+import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
 import { withGetSessionSsr } from '@libs/server/withSession';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
@@ -17,7 +16,7 @@ interface ICartProps {
 const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
     const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
     const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
-    const [setDBShippingAddress, { data: addressData }] = useCallApi({ url: `/api/user/address`, method: 'POST' });
+    const [setDBShippingAddress] = actionDataRequest({ url: `/api/user/address`, method: 'POST' });
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
@@ -38,6 +37,7 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
                                 <div className='w-full flex flex-col space-y-12'>
                                     {cartProducts?.map((product) =>
                                         <CartItem
+                                            key={product?.id}
                                             id={product?.id}
                                             name={product?.name}
                                             image={product?.image}
@@ -111,16 +111,14 @@ export const getServerSideProps = withGetSessionSsr(
         if (!loggedUser) {
             return { props: {} }
         }
-        const response = await fetchRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } })
-            .then(response => response.json());
+        const response = await loadDataRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } });
         const findCartProducts = response?.cartProducts
-            && await fetchRequest(
+            && await loadDataRequest(
                 {
                     url: `${process.env.SERVER_BASEURL}/api/cart/loadCart`
                     , method: 'POST'
                     , data: { productIds: response.cartProducts.map((product: Cart) => product.productId) }
-                }
-            ).then(response => response.json());
+                });
         return {
             props: {
                 address: response?.address,

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
 import { FieldErrors, useForm } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
-import useCallApi from '@libs/client/useCallApi';
+import { actionDataRequest } from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
 import SearchAddress from '@components/Address';
 import Popup from 'reactjs-popup';
@@ -28,8 +28,8 @@ const Join: NextPage = () => {
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
 
     // To fetch data
-    const [createUser, { data: createUserData }] = useCallApi({ url: '/api/user/join', method: 'POST' });
-    const [checkExist, { data: checkExistData }] = useCallApi({ url: '/api/user/dataExist', method: 'POST' });
+    const [createUser, { data: createUserData }] = actionDataRequest({ url: '/api/user/join', method: 'POST' });
+    const [checkExist, { data: checkExistData }] = actionDataRequest({ url: '/api/user/dataExist', method: 'POST' });
 
     // To open validation.
     const idValidateArea: React.MutableRefObject<any> = useRef();

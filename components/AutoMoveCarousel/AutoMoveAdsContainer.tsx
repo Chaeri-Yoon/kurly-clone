@@ -24,12 +24,13 @@ export default function AdContainer({ salePromoImages }: IAdContainerProps) {
         defaultTransitionTime: 0.4
     });
     useEffect(initialSetting, []);
-
-    let mounted = true;
     useEffect(() => {
-        if (mounted) rotateItem();
-        return (): void => {
-            mounted = false;
+        rotateItem();
+        return () => {
+            if (autoMoveTimeout) {
+                clearTimeout(autoMoveTimeout);
+                setAutoMoveTimeout(null);
+            }
         }
     }, [salePromoWidth, salePromoIndex]);
 

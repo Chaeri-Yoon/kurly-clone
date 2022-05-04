@@ -3,8 +3,7 @@ import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
-import fetchRequest from '@libs/client/fetchRequest';
-import useCallApi from '@libs/client/useCallApi';
+import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
 import { useEffect } from 'react';
 
 type TPackageType = {
@@ -14,10 +13,10 @@ type TPackageType = {
     ICE_STYROFOAM: string
 }
 interface IProductDetail {
-    product: Product | null
+    product: Product
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
-    const [addProductToCart, { data }] = useCallApi({ url: '/api/cart/addToCart', method: 'POST' });
+    const [addProductToCart, { data }] = actionDataRequest({ url: '/api/cart/addToCart', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: product?.id });
     const saledPrice = product ? (1 - (product.salePercentage * 0.01)) * product.originalPrice : 0;
     const className = {
@@ -124,9 +123,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
     )
 }
 export async function getServerSideProps({ query: { id } }: { query: { id: string } }) {
-    const response = await fetchRequest({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' })
-        .then(response => response.json());
-
+    const response = await loadDataRequest({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' });
     return {
         props: {
             product: response?.product

@@ -6,7 +6,7 @@ import Image from "next/image";
 import NavBar from "./NavBar";
 import Link from "next/link";
 import { ILoggedUser } from 'pages/api/user';
-import useCallApi from "@libs/client/useCallApi";
+import { actionDataRequest } from "@libs/client/useCallApi";
 import { useEffect } from "react";
 import { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 export default function ({ loggedUser }: { loggedUser?: ILoggedUser }) {
     const router = useRouter();
     const { mutate: loggedMutate } = useSWRConfig();
-    const [logout, { data }] = useCallApi({ url: '/api/user/logout', method: 'GET' });
+    const [logout, { data }] = actionDataRequest({ url: '/api/user/logout', method: 'GET' });
     const onLogout = () => logout();
     useEffect(() => {
         if (!data?.ok) return;
