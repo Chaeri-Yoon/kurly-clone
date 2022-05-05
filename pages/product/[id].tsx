@@ -16,7 +16,7 @@ interface IProductDetail {
     product: Product
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
-    const [addProductToCart, { data }] = actionDataRequest({ url: '/api/cart/addToCart', method: 'POST' });
+    const [addProductToCart, { data }] = actionDataRequest({ url: '/api/cart/addCartProduct', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: product?.id });
     const saledPrice = product ? (1 - (product.salePercentage * 0.01)) * product.originalPrice : 0;
     const className = {
@@ -28,15 +28,6 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
         COOL_STYROFOAM: '냉장/스티로폼',
         ICE_STYROFOAM: '냉동/스티로폼'
     }
-    // For Test
-    useEffect(() => {
-        if (!data?.ok) return;
-        if (data?.message) {
-            console.log(data?.message)
-            return;
-        }
-        console.log(data);
-    }, [data])
     return (
         product ? (
             <div className='w-full p-[var(--frame-padding)] my-[20px] text-sm'>

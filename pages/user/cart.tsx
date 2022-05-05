@@ -1,5 +1,5 @@
 import SearchAddress from '@components/Address';
-import CartItem from '@components/Cart/CartItem';
+import CartProduct from '@components/Cart/CartProduct';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
@@ -8,15 +8,18 @@ import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 import Popup from 'reactjs-popup';
+import useSWR from 'swr';
 
 interface ICartProps {
-    address?: string,
-    cartProducts?: Product[]
+    address?: string
 }
-const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
+const Cart: NextPage<ICartProps> = ({ address }) => {
+    const { data: cartProductsData } = useSWR('/api/cart/loadCartProducts');
     const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
     const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
-    const [setDBShippingAddress] = actionDataRequest({ url: `/api/user/address`, method: 'POST' });
+    const [setDBShippingAddress] = actionDataRequest({ url: '/api/user/address', method: 'POST' });
+    const [selectedProductSum, setSelectedProductSum] = useState(0);
+    const [selectedSalesPriceSum, setSelectedSalesPriceSum] = useState(0);
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
@@ -29,20 +32,22 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
                     <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
-                        {!cartProducts || cartProducts.length === 0 ? (
+                        {!cartProductsData || cartProductsData?.cartProducts?.length === 0 ? (
                             <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
                         ) : (
                             <div className='w-full flex flex-col'>
                                 <span className='text-lg'>냉장 상품</span>
                                 <div className='w-full flex flex-col space-y-12'>
-                                    {cartProducts?.map((product) =>
-                                        <CartItem
+                                    {cartProductsData?.cartProducts?.map((product: Product) =>
+                                        <CartProduct
                                             key={product?.id}
                                             id={product?.id}
                                             name={product?.name}
                                             image={product?.image}
                                             salePercentage={product?.salePercentage}
                                             originalPrice={product?.originalPrice}
+                                            setSelectedProductSum={setSelectedProductSum}
+                                            setSelectedSalesPriceSum={setSelectedSalesPriceSum}
                                         />)}
                                 </div>
                             </div>
@@ -75,10 +80,10 @@ const Cart: NextPage<ICartProps> = ({ address, cartProducts }) => {
                                 <span>결제예정금액</span>
                             </div>
                             <div className='w-1/2 flex flex-col items-end space-y-3'>
-                                <span>0원</span>
-                                <span>0원</span>
-                                <span>0원</span>
-                                <span><span className='text-[1.38rem]'>0</span>원</span>
+                                <span>{selectedProductSum.toLocaleString()}원</span>
+                                <span>{selectedSalesPriceSum.toLocaleString()}원</span>
+                                <span>{selectedProductSum >= 30000 ? 0 : '3,000'}원</span>
+                                <span><span className='text-[1.38rem]'>{selectedProductSum.toLocaleString()}</span>원</span>
                             </div>
                         </div>
                     </div>
@@ -112,18 +117,10 @@ export const getServerSideProps = withGetSessionSsr(
             return { props: {} }
         }
         const response = await loadDataRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } });
-        const findCartProducts = response?.cartProducts
-            && await loadDataRequest(
-                {
-                    url: `${process.env.SERVER_BASEURL}/api/cart/loadCart`
-                    , method: 'POST'
-                    , data: { productIds: response.cartProducts.map((product: Cart) => product.productId) }
-                });
         return {
             props: {
-                address: response?.address,
-                cartProducts: findCartProducts?.cartProducts
-            },
+                address: response?.address
+            }
         };
     },
 );
