@@ -12,32 +12,45 @@ interface ICartProduct {
     id: number,
     name: string,
     image: string,
+    quantity: number,
     salePercentage: number,
     originalPrice: number,
     setSelectedProductSum: Dispatch<SetStateAction<number>>,
     setSelectedSalesPriceSum: Dispatch<SetStateAction<number>>
 }
-export default function ({ id, name, image, salePercentage, originalPrice, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
+export default function ({ id, name, image, quantity, salePercentage, originalPrice, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
     const [toggleSelect, setToggleSelect] = useState(true);
+    const [changedQuantity, setChangedQuantity] = useState<{ type: 'ADD' | 'MINUS' | null, value: number, prev: number }>({ type: null, value: quantity, prev: quantity - 1 });
     const { mutate: cartProductsMutate } = useSWRConfig();
-    const [deleteCartProduct, { data: deleteCartProductData }] = actionDataRequest({ url: '/api/cart/deleteCartProduct', method: 'POST' });
+    const [deleteCartProduct] = actionDataRequest({ url: '/api/cart/deleteCartProduct', method: 'POST' });
+    const [modifyCartProduct] = actionDataRequest({ url: '/api/cart/modifyCartProduct', method: 'POST' });
     const saledPrice = (1 - (salePercentage * 0.01)) * originalPrice;
+
     const onProductSelected = () => setToggleSelect(prev => !prev);
-    const onProductDelete = () => deleteCartProduct({ productId: id });
-    const sumsUpdate = (isSelected = toggleSelect) => {
-        setSelectedProductSum(prev => isSelected ? prev + saledPrice : prev - saledPrice);
-        setSelectedSalesPriceSum(prev => isSelected ? prev + (originalPrice - saledPrice) : prev - (originalPrice - saledPrice));
+    const onProductDelete = () => {
+        cartProductsMutate('/api/cart/loadCartProducts', (prev: any) => {
+            const newCartProductLists = prev?.products?.filter((data: any) => data.product.id !== id);
+            return { ...prev, products: newCartProductLists }
+        }, false);
+        deleteCartProduct({ productId: id })
+    }
+    const onProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
+        setChangedQuantity(prevData => { return { type: changeType, value: changeType === 'ADD' ? prevData.value + 1 : prevData.value - 1, prev: prevData.value } });
+    }
+    const sumsUpdate = (isSelected: boolean, isQuantityUpdated = false) => {
+        if (!isSelected && isQuantityUpdated) return;
+        const quantityDiff = isQuantityUpdated ? Math.abs(changedQuantity.value - changedQuantity.prev) : changedQuantity.value;
+        setSelectedProductSum(prev => (isQuantityUpdated ? changedQuantity.type === 'ADD' : isSelected) ? prev + (quantityDiff * saledPrice) : prev - (quantityDiff * saledPrice));
+        setSelectedSalesPriceSum(prev => (isQuantityUpdated ? changedQuantity.type === 'ADD' : isSelected) ? prev + (quantityDiff * (originalPrice - saledPrice)) : prev - (quantityDiff * (originalPrice - saledPrice)));
     }
     useEffect(() => {
-        sumsUpdate();
-    }, [toggleSelect])
+        sumsUpdate(toggleSelect);
+    }, [toggleSelect]);
     useEffect(() => {
-        if (!deleteCartProductData?.ok) return;
-        cartProductsMutate('/api/cart/loadCartProducts', (prev: any) => {
-            const newCartProductLists = prev?.cartProducts?.filter((data: any) => data.id !== id);
-            return { ...prev, cartProducts: newCartProductLists }
-        }, false);
-    }, [deleteCartProductData])
+        if (changedQuantity.type === null) return;
+        sumsUpdate(toggleSelect, true);
+        modifyCartProduct({ productId: id, quantity: changedQuantity.value });
+    }, [changedQuantity])
     useEffect(() => {
         return () => sumsUpdate(false)
     }, [])
@@ -56,9 +69,9 @@ export default function ({ id, name, image, salePercentage, originalPrice, setSe
             </div>
             <div className="w-1/2 flex justify-end items-center">
                 <div className="px-3 py-[0.13rem] w-[24%] flex justify-between items-center border">
-                    <span>-</span>
-                    <span>1</span>
-                    <span>+</span>
+                    <button className="disabled:text-gray-300" onClick={() => onProductChangeQuantity('MINUS')} disabled={changedQuantity.value === 1 ? true : false}><span>-</span></button>
+                    <span>{changedQuantity.value}</span>
+                    <button onClick={() => onProductChangeQuantity('ADD')}><span>+</span></button>
                 </div>
                 <div className="ml-[4.6rem] flex justify-end items-center">
                     <div className="flex flex-col items-end space-y-1">

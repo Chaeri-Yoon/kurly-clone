@@ -32,20 +32,21 @@ const Cart: NextPage<ICartProps> = ({ address }) => {
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
                     <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
-                        {!cartProductsData || cartProductsData?.cartProducts?.length === 0 ? (
+                        {!cartProductsData || cartProductsData?.products?.length === 0 ? (
                             <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
                         ) : (
                             <div className='w-full flex flex-col'>
                                 <span className='text-lg'>냉장 상품</span>
                                 <div className='w-full flex flex-col space-y-12'>
-                                    {cartProductsData?.cartProducts?.map((product: Product) =>
+                                    {cartProductsData?.products?.map((element: { product: Product, quantity: number }) =>
                                         <CartProduct
-                                            key={product?.id}
-                                            id={product?.id}
-                                            name={product?.name}
-                                            image={product?.image}
-                                            salePercentage={product?.salePercentage}
-                                            originalPrice={product?.originalPrice}
+                                            key={element?.product?.id}
+                                            id={element?.product?.id}
+                                            name={element?.product?.name}
+                                            image={element?.product?.image}
+                                            quantity={element?.quantity}
+                                            salePercentage={element?.product?.salePercentage}
+                                            originalPrice={element?.product?.originalPrice}
                                             setSelectedProductSum={setSelectedProductSum}
                                             setSelectedSalesPriceSum={setSelectedSalesPriceSum}
                                         />)}
@@ -83,7 +84,7 @@ const Cart: NextPage<ICartProps> = ({ address }) => {
                                 <span>{selectedProductSum.toLocaleString()}원</span>
                                 <span>{selectedSalesPriceSum.toLocaleString()}원</span>
                                 <span>{selectedProductSum >= 30000 ? 0 : '3,000'}원</span>
-                                <span><span className='text-[1.38rem]'>{selectedProductSum.toLocaleString()}</span>원</span>
+                                <span><span className='text-[1.38rem]'>{selectedProductSum >= 30000 ? selectedProductSum.toLocaleString() : (3000 + selectedProductSum).toLocaleString()}</span>원</span>
                             </div>
                         </div>
                     </div>

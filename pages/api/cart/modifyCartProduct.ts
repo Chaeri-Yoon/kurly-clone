@@ -3,19 +3,22 @@ import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { body: { productId }, session: { user } } = req;
+    const { body: { productId, quantity }, session: { user } } = req;
     if (!productId || !user) {
         return res.json({
             ok: false
         })
     }
     try {
-        await client.cart.delete({
+        await client.cart.update({
             where: {
                 userId_productId: {
                     userId: user.id,
                     productId
                 }
+            },
+            data: {
+                quantity
             }
         })
         return res.json({

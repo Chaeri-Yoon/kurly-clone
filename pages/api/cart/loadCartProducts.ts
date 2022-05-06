@@ -6,32 +6,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { session: { user } } = req;
     if (!user) {
         return res.json({
-            ok: false
+            ok: false,
+            products: []
         })
     }
     try {
-        const findUser = await client.user.findUnique({
+        const findUserCartProducts = await client.cart.findMany({
             where: {
-                id: user.id
+                userId: user.id
             },
             select: {
-                cartProducts: true
-            }
-        })
-        if (!findUser) {
-            return res.json({
-                ok: true
-            })
-        }
-        const cartProductIds = findUser.cartProducts.map(cartProducts => cartProducts['productId']);
-        const cartProducts = await client.product.findMany({
-            where: {
-                id: { in: cartProductIds }
+                product: true,
+                quantity: true
             }
         })
         res.json({
             ok: true,
-            cartProducts
+            products: findUserCartProducts
         })
     } catch (error) {
         console.log(error);
