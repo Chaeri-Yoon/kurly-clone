@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
 import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useSWRConfig } from 'swr';
 
 type TPackageType = {
     [index: string]: string
@@ -16,8 +17,11 @@ interface IProductDetail {
     product: Product
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
-    const [addProductToCart, { data }] = actionDataRequest({ url: '/api/cart/addCartProduct', method: 'POST' });
-    const onAddToCartClicked = () => addProductToCart({ productId: product?.id });
+    const [quantity, setQuantity] = useState(1);
+    const [addProductToCart] = actionDataRequest({ url: '/api/cart/addCartProduct', method: 'POST' });
+    const onAddToCartClicked = () => addProductToCart({ productId: product?.id, quantity })
+
+    const onChangeQuantity = (changeType: 'ADD' | 'MINUS') => setQuantity(prev => changeType === 'ADD' ? prev + 1 : prev - 1);
     const saledPrice = product ? (1 - (product.salePercentage * 0.01)) * product.originalPrice : 0;
     const className = {
         INFO_ROW_CLASS: 'py-[20px] w-full flex items-start border-b',
@@ -82,9 +86,9 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                             <div className={`${className.INFO_ROW_CLASS} justify-start`}>
                                 <span className={className.LABEL}>구매수량</span>
                                 <div className='w-[16%] px-[0.5rem] flex justify-between items-center border rounded-[0.2rem]'>
-                                    <button className='text-xl'>-</button>
-                                    <span>1</span>
-                                    <button className='text-xl'>+</button>
+                                    <button onClick={() => onChangeQuantity('MINUS')} className='disabled:text-gray-300 text-xl' disabled={quantity === 1}>-</button>
+                                    <span>{quantity}</span>
+                                    <button onClick={() => onChangeQuantity('ADD')} className='text-xl'>+</button>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +96,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                             <div className='w-full flex justify-end items-center'>
                                 <span className='text-[0.812rem]'>총 상품금액 : </span>
                                 <div>
-                                    <span className='ml-2 text-[2rem]'>{saledPrice.toLocaleString()}</span>
+                                    <span className='ml-2 text-[2rem]'>{(quantity * saledPrice).toLocaleString()}</span>
                                     <span className='ml-[0.25rem] text-xl'>원</span>
                                 </div>
                             </div>

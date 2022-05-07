@@ -67,13 +67,15 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
                     </div>
                 </Link>
             </div>
-            <div className="w-1/2 flex justify-end items-center">
-                <div className="px-3 py-[0.13rem] w-[24%] flex justify-between items-center border">
-                    <button className="disabled:text-gray-300" onClick={() => onProductChangeQuantity('MINUS')} disabled={changedQuantity.value === 1 ? true : false}><span>-</span></button>
-                    <span>{changedQuantity.value}</span>
-                    <button onClick={() => onProductChangeQuantity('ADD')}><span>+</span></button>
+            <div className="w-1/2 flex justify-between items-center">
+                <div className="w-1/2 flex justify-end items-center">
+                    <div className="px-3 py-[0.13rem] w-1/2 flex justify-between items-center border">
+                        <button className="disabled:text-gray-300" onClick={() => onProductChangeQuantity('MINUS')} disabled={changedQuantity.value === 1}><span>-</span></button>
+                        <span>{changedQuantity.value}</span>
+                        <button onClick={() => onProductChangeQuantity('ADD')}><span>+</span></button>
+                    </div>
                 </div>
-                <div className="ml-[4.6rem] flex justify-end items-center">
+                <div className="w-1/2 flex justify-end items-center">
                     <div className="flex flex-col items-end space-y-1">
                         <span>{saledPrice.toLocaleString()}원</span>
                         {salePercentage !== 0 && <span className="line-through text-sm text-kurly-grey">{originalPrice.toLocaleString()}원</span>}

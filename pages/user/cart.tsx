@@ -14,12 +14,13 @@ interface ICartProps {
     address?: string
 }
 const Cart: NextPage<ICartProps> = ({ address }) => {
-    const { data: cartProductsData } = useSWR('/api/cart/loadCartProducts');
+    const { data: cartProductsData, isValidating, mutate } = useSWR('/api/cart/loadCartProducts');
     const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
     const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
     const [setDBShippingAddress] = actionDataRequest({ url: '/api/user/address', method: 'POST' });
     const [selectedProductSum, setSelectedProductSum] = useState(0);
     const [selectedSalesPriceSum, setSelectedSalesPriceSum] = useState(0);
+    useEffect(() => { mutate() }, []);
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
@@ -32,27 +33,31 @@ const Cart: NextPage<ICartProps> = ({ address }) => {
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
                     <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
-                        {!cartProductsData || cartProductsData?.products?.length === 0 ? (
-                            <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
-                        ) : (
-                            <div className='w-full flex flex-col'>
-                                <span className='text-lg'>냉장 상품</span>
-                                <div className='w-full flex flex-col space-y-12'>
-                                    {cartProductsData?.products?.map((element: { product: Product, quantity: number }) =>
-                                        <CartProduct
-                                            key={element?.product?.id}
-                                            id={element?.product?.id}
-                                            name={element?.product?.name}
-                                            image={element?.product?.image}
-                                            quantity={element?.quantity}
-                                            salePercentage={element?.product?.salePercentage}
-                                            originalPrice={element?.product?.originalPrice}
-                                            setSelectedProductSum={setSelectedProductSum}
-                                            setSelectedSalesPriceSum={setSelectedSalesPriceSum}
-                                        />)}
-                                </div>
-                            </div>
-                        )
+                        {
+                            isValidating
+                                ? <span className='w-full text-center self-center text-base'>장바구니를 로드 중입니다.</span>
+                                : (!cartProductsData || cartProductsData?.products?.length === 0 ? (
+                                    <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
+                                ) : (
+                                    <div className='w-full flex flex-col'>
+                                        <span className='text-lg'>냉장 상품</span>
+                                        <div className='w-full flex flex-col space-y-12'>
+                                            {cartProductsData?.products?.map((element: { product: Product, quantity: number }) =>
+                                                <CartProduct
+                                                    key={element?.product?.id}
+                                                    id={element?.product?.id}
+                                                    name={element?.product?.name}
+                                                    image={element?.product?.image}
+                                                    quantity={element?.quantity}
+                                                    salePercentage={element?.product?.salePercentage}
+                                                    originalPrice={element?.product?.originalPrice}
+                                                    setSelectedProductSum={setSelectedProductSum}
+                                                    setSelectedSalesPriceSum={setSelectedSalesPriceSum}
+                                                />)}
+                                        </div>
+                                    </div>
+                                )
+                                )
                         }
                     </div>
                     <SelectDeleteProduct />

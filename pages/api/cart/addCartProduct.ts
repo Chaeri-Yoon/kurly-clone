@@ -3,7 +3,7 @@ import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { session: { user }, body: { productId } } = req;
+    const { session: { user }, body: { productId, quantity } } = req;
     if (!user) {
         return res.json({
             ok: true,
@@ -11,8 +11,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         })
     }
     try {
-        await client.cart.create({
-            data: {
+        await client.cart.upsert({
+            where: {
+                userId_productId: {
+                    userId: user.id,
+                    productId
+                }
+            },
+            create: {
                 user: {
                     connect: {
                         id: user.id
@@ -22,6 +28,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                     connect: {
                         id: productId
                     }
+                },
+                quantity
+            },
+            update: {
+                quantity: {
+                    increment: quantity
                 }
             }
         });
