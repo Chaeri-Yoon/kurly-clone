@@ -22,7 +22,7 @@ export default function ({ loggedUser }: { loggedUser?: ILoggedUser }) {
         router.push('/');
     }, [data]);
     return (
-        <header className="text-kurly-black">
+        <header className="text-kurly-black bg-white">
             <div className="relative w-full py-3 px-[6.3rem] flex justify-center items-center space-x-2 bg-kurly-purple  ">
                 <a className="flex justify-center items-center flex-1 text-[0.82rem]">
                     <span className="font-medium mr-5 text-white">지금 가입하고 인기상품 100원에 받아가세요!</span>

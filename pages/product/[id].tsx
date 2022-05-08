@@ -4,8 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
 import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
-import { useEffect, useState } from 'react';
-import { useSWRConfig } from 'swr';
+import { useState } from 'react';
 
 type TPackageType = {
     [index: string]: string

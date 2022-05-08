@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faMagnifyingGlass, faLocationDot, faHeart, faCartShopping, faCarrot, faAppleWhole, faFish, faDrumstickBite, faBowlingBall, faBreadSlice, faSeedling, faWineBottle, faOilCan, faMugHot, faMugSaucer, faCookieBite } from '@fortawesome/free-solid-svg-icons';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import Link from 'next/link';
 
@@ -14,9 +14,14 @@ const DropdownList = ({ icon, text }: { icon: IconProp, text: string }) => {
     )
 }
 export default function () {
+    const [yscrolled, setYscrolled] = useState(0);
+
+    useEffect(() => {
+        window.addEventListener('scroll', () => setYscrolled(window.pageYOffset));
+    }, []);
 
     return (
-        <div>
+        <div className={`${yscrolled > 132 && 'fixed top-0'} w-full bg-white z-[100] transition-all`}>
             <div className='border-b border-b-gray-400 border-opacity-20'>
                 <nav className="p-[var(--frame-padding)] w-full flex justify-between items-center text-base ">
                     <ul className='relative w-7/12 h-full flex justify-between items-center text-center'>
