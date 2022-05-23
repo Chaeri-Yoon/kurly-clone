@@ -7,8 +7,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { actionDataRequest } from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
 import SearchAddress from '@components/Address';
-import Popup from 'reactjs-popup';
 import { useSWRConfig } from 'swr';
+import Popup from '@components/Popup';
 
 interface IForm {
     [key: string]: any,
@@ -24,7 +24,7 @@ const Join: NextPage = () => {
     const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const [address, setAddress] = useState('');
-    const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
+    const [addressPopupOpen, setAddressPopupOpen] = useState(false);
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
 
     // To fetch data
@@ -52,7 +52,7 @@ const Join: NextPage = () => {
     email.current = watch('email', '');
     agreeAll.current = watch('agree_all');
 
-    useEffect(() => setIsAddressPopupOpen(false), [address])
+    useEffect(() => setAddressPopupOpen(false), [address])
 
     // Handle events involving fetching data and some work related to its response.
     const onCheckExist = (data: { [key: string]: any }) => checkExist(data);
@@ -152,30 +152,18 @@ const Join: NextPage = () => {
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>주소</span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    {address.length === 0 ? (
-                                        <div className={`${className.INPUT_CONTAINER}`}>
-                                            <Popup trigger={
-                                                <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`}>
-                                                    <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
-                                                    <span>주소 검색</span>
-                                                </button>} modal>
-                                                <SearchAddress setAddress={setAddress} />
-                                            </Popup>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className={`${className.INPUT_CONTAINER}`}>
-                                                <input className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} readOnly value={address} {...register("address")} />
-                                            </div>
-                                            <button type={'button'} onClick={() => setIsAddressPopupOpen(true)} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
-                                                <span>재검색</span>
-                                            </button>
-                                            <Popup open={isAddressPopupOpen}>
-                                                <SearchAddress setAddress={setAddress} />
-                                            </Popup>
-                                        </>
-                                    )}
+                                    <div className={`${className.INPUT_CONTAINER}`}>
+                                        {address.length === 0 ? (
+                                            <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`} />
+                                        ) : (
+                                            <input className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} readOnly value={address} {...register("address")} />
+                                        )}
+                                        <button type={'button'} onClick={() => setAddressPopupOpen(true)} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
+                                            <span>검색</span>
+                                        </button>
+                                        {addressPopupOpen && <Popup><SearchAddress setAddress={setAddress} /></Popup>}
+                                    </div>
                                 </div>
                             </div>
                         </div>

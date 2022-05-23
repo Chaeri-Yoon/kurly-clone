@@ -10,6 +10,7 @@ export default function Layout({ children }: any) {
             {data?.user ? <Header loggedUser={data?.user} /> : <Header />}
             <main>
                 {children}
+                <div id="portal" />
             </main>
         </>
     )
