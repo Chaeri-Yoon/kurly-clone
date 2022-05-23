@@ -19,7 +19,9 @@ export default function ({ id, imgUrl, name, salePercentage, originalPrice }: IP
         <div className="w-[calc(25%-0.8rem)] inline-block cursor-pointer relative">
             <div className="w-full aspect-[250/315] relative">
                 <Link href={`/product/${id}`}>
-                    <Image src={imgUrl} layout="fill"></Image>
+                    <a>
+                        <Image src={imgUrl} layout="fill"></Image>
+                    </a>
                 </Link>
                 <button onClick={() => onAddToCartClicked()} className="absolute bottom-2 right-2 flex justify-center items-center w-1/6 aspect-square rounded-full z-10 bg-kurly-purple opacity-50 active:opacity-100">
                     <FontAwesomeIcon icon={faCartShopping} inverse />
