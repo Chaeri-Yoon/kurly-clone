@@ -154,16 +154,21 @@ const Join: NextPage = () => {
                                 <div className={`${className.DATA_AREA}`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         {address.length === 0 ? (
-                                            <button type={'button'} className={`${className.DATA_AREA_CHILD} ${className.INPUT} flex justify-center items-center border-kurly-purple text-kurly-purple font-semibold`} />
+                                            <button type={'button'} onClick={() => setAddressPopupOpen(true)} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON} ml-0`}>
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
+                                                <span>검색</span>
+                                            </button>
                                         ) : (
                                             <input className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} readOnly value={address} {...register("address")} />
                                         )}
+                                    </div>
+                                    {address.length !== 0 && (
                                         <button type={'button'} onClick={() => setAddressPopupOpen(true)} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>
                                             <FontAwesomeIcon icon={faMagnifyingGlass} className='mr-1' />
-                                            <span>검색</span>
+                                            <span>재검색</span>
                                         </button>
-                                        {addressPopupOpen && <Popup><SearchAddress setAddress={setAddress} /></Popup>}
-                                    </div>
+                                    )}
+                                    {addressPopupOpen && <Popup setPopupOpen={setAddressPopupOpen}><SearchAddress setAddress={setAddress} /></Popup>}
                                 </div>
                             </div>
                         </div>

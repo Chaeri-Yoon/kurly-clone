@@ -27,7 +27,7 @@ const SearchAddress = ({ setAddress }: { setAddress: Dispatch<SetStateAction<str
         setCompleteSearch(true);
     }
     return (
-        <div className="w-[30rem] aspect-[13/14] bg-white border">
+        <div className="w-full aspect-[1/1] bg-white border">
             {completeSearch ? (
                 <DetailAddress
                     selectedAddress={{ address: selectedAddress?.address || '', zonecode: selectedAddress?.zonecode || '' }}
