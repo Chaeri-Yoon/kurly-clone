@@ -33,9 +33,9 @@ export default function ({ id, imgUrl, name, salePercentage, originalPrice }: IP
                     <div>
                         <div className="flex justify-start items-start font-semibold">
                             {salePercentage !== 0 && <span className="mr-1 text-[#FA622F] tracking-wide">{salePercentage}%</span>}
-                            <span className="tracking-wide">{((1 - salePercentage * 0.01) * originalPrice).toLocaleString()}원</span>
+                            <span className="tracking-wide">${((1 - salePercentage * 0.01) * originalPrice).toFixed(2)}</span>
                         </div>
-                        <span className="text-[#A2A2A2] text-[15px] line-through">{salePercentage !== 0 && `${originalPrice.toLocaleString()}원`}</span>
+                        <span className="text-[#A2A2A2] text-[15px] line-through">{salePercentage !== 0 && `$${originalPrice}`}</span>
                     </div>
                 </div>
             </Link>

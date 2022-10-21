@@ -50,12 +50,12 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                             <div className={`${className.INFO_ROW_CLASS} flex-col space-y-[5px]`}>
                                 {product.salePercentage !== 0 && <span>회원할인가</span>}
                                 <div className='mb-[10px] flex justify-start items-center text-3xl'>
-                                    <span className='mr-[9px]'>{saledPrice.toLocaleString()}<span className='text-base'> 원</span></span>
+                                    <span className='mr-[9px]'>${saledPrice.toFixed(2)}</span>
                                     {product.salePercentage !== 0 && <span className='text-[#FA622F]'>{product.salePercentage}%</span>}
                                 </div>
                                 {product.salePercentage !== 0 && (
                                     <div className='flex justify-start items-center text-kurly-grey'>
-                                        <span className='line-through mr-[5px]'>{product.originalPrice.toLocaleString()}원</span>
+                                        <span className='line-through mr-[5px]'>${product.originalPrice}</span>
                                         <span><FontAwesomeIcon icon={faCircleQuestion} /></span>
                                     </div>
                                 )}
@@ -94,10 +94,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                         <div className='pt-8 w-full flex flex-col items-start space-y-4'>
                             <div className='w-full flex justify-end items-center'>
                                 <span className='text-[0.812rem]'>총 상품금액 : </span>
-                                <div>
-                                    <span className='ml-2 text-[2rem]'>{(quantity * saledPrice).toLocaleString()}</span>
-                                    <span className='ml-[0.25rem] text-xl'>원</span>
-                                </div>
+                                <span className='ml-2 text-[2rem]'>${(quantity * saledPrice).toLocaleString()}</span>
                             </div>
                             <div className='w-full flex justify-end items-center'>
                                 <span className='px-[0.55rem] text-[0.69rem] rounded-full bg-[#FFBF00] text-white'>적립</span>

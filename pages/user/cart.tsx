@@ -86,10 +86,10 @@ const Cart: NextPage<ICartProps> = ({ address }) => {
                                 <span>결제예정금액</span>
                             </div>
                             <div className='w-1/2 flex flex-col items-end space-y-3'>
-                                <span>{selectedProductSum.toLocaleString()}원</span>
-                                <span>{selectedSalesPriceSum.toLocaleString()}원</span>
-                                <span>{selectedProductSum >= 30000 ? 0 : '3,000'}원</span>
-                                <span><span className='text-[1.38rem]'>{selectedProductSum >= 30000 ? selectedProductSum.toLocaleString() : (3000 + selectedProductSum).toLocaleString()}</span>원</span>
+                                <span>${selectedProductSum.toFixed(2)}</span>
+                                <span>${selectedSalesPriceSum.toFixed(2)}</span>
+                                <span>${selectedProductSum >= 30 ? 0 : '5'}</span>
+                                <span>$<span className='text-[1.38rem]'>{selectedProductSum >= 30 ? selectedProductSum.toFixed(2) : (5 + selectedProductSum).toFixed(2)}</span></span>
                             </div>
                         </div>
                     </div>

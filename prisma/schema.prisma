@@ -26,7 +26,6 @@ model User {
 
 model Product {
   id             Int         @id @default(autoincrement())
-  category       Category    @default(RECOMMENDATION)
   name           String      @unique
   salePercentage Int
   originalPrice  Int
@@ -47,15 +46,6 @@ model Cart {
   quantity  Int     @default(1)
 
   @@id([userId, productId])
-}
-
-enum Category {
-  RECOMMENDATION
-  SALE
-  MEETPRICE
-  TOPREVIEW
-  HOT
-  LASTSALE
 }
 
 enum PackageType {

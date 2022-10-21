@@ -77,8 +77,8 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
                 </div>
                 <div className="w-1/2 flex justify-end items-center">
                     <div className="flex flex-col items-end space-y-1">
-                        <span>{saledPrice.toLocaleString()}원</span>
-                        {salePercentage !== 0 && <span className="line-through text-sm text-kurly-grey">{originalPrice.toLocaleString()}원</span>}
+                        <span>${saledPrice.toFixed(2)}</span>
+                        {salePercentage !== 0 && <span className="line-through text-sm text-kurly-grey">${originalPrice.toFixed(2)}</span>}
                     </div>
                     <button onClick={() => onProductDelete()} className="pl-[1.4rem] pr-3 text-kurly-grey opacity-50"><FontAwesomeIcon icon={faX} /></button>
                 </div>
