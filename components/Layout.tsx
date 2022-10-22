@@ -3,11 +3,11 @@ import useSWR from "swr";
 import Header from "./HeaderParts/Header";
 
 export default function Layout({ children }: any) {
-    const { data } = useSWR('/api/user');
+    const { data } = useSWR('/api/user?field=name');
     return (
         <>
             <Head><title>Kurly :: Daily Groceries</title></Head>
-            {data?.user ? <Header loggedUser={data?.user} /> : <Header />}
+            {data?.loggedUser ? <Header loggedUser={data?.loggedUser} /> : <Header />}
             <main>
                 {children}
                 <div id="portal" />

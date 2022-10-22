@@ -2,8 +2,12 @@ import client from "@libs/server/client";
 import { withApiSession } from "@libs/server/withSession";
 import { NextApiRequest, NextApiResponse } from "next";
 import crypto from 'crypto';
+import { IDataResponse } from "@libs/client/useCallApi";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export interface ILoginResponse extends IDataResponse {
+    message?: string
+}
+async function handler(req: NextApiRequest, res: NextApiResponse<ILoginResponse>) {
     const { body: { userId, password } } = await req;
     try {
         // Find a user in db
@@ -14,8 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
         if (!user) {
             res.json({
-                ok: true,
-                logged: false,
+                ok: false,
                 message: '아이디 또는 비밀번호 오류입니다'
             })
             return;
@@ -24,8 +27,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const inputPassword = crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex');
         if (!(user.password === inputPassword)) {
             res.json({
-                ok: true,
-                logged: false,
+                ok: false,
                 message: '아이디 또는 비밀번호 오류입니다'
             })
             return;
@@ -35,8 +37,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await req.session.save();
 
         res.json({
-            ok: true,
-            logged: true
+            ok: true
         })
 
     } catch (error) {
