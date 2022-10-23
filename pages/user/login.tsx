@@ -1,7 +1,8 @@
-import { actionDataRequest } from '@libs/client/useCallApi';
+import { mutateData } from '@libs/client/useCallApi';
 import type { NextPage } from 'next'
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { ILoginResponse } from 'pages/api/user/login';
 import { useEffect } from 'react';
 import { FieldErrors, useForm } from 'react-hook-form'
 import { useSWRConfig } from 'swr';
@@ -15,7 +16,7 @@ const Login: NextPage = () => {
     const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const { register, handleSubmit } = useForm<IForm>();
-    const [login, { data }] = actionDataRequest({ url: '/api/user/login', method: 'POST' });
+    const [login, { data }] = mutateData<ILoginResponse, null>({ url: '/api/user/login', method: 'POST' });
 
     const onSubmit = (data: IForm) => login(data);
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
@@ -23,8 +24,7 @@ const Login: NextPage = () => {
         FORM_ELEMENT: 'w-full p-4 border rounded-[0.2rem]'
     }
     useEffect(() => {
-        if (!data?.ok) return;
-        if (!data?.logged) alert(`${data?.message}`);
+        if (!data.ok) alert(`${data.message || 'Something went wrong.'}`);
         else {
             loggedMutate('/api/user');
             router.push('/');

@@ -3,8 +3,9 @@ import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faCircleQuestion, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@prisma/client';
-import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
+import { mutateData, loadData } from '@libs/client/useCallApi';
 import { useState } from 'react';
+import { IProductResponse } from 'pages/api/product/[id]';
 
 type TPackageType = {
     [index: string]: string
@@ -17,7 +18,7 @@ interface IProductDetail {
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
     const [quantity, setQuantity] = useState(1);
-    const [addProductToCart] = actionDataRequest({ url: '/api/cart/addCartProduct', method: 'POST' });
+    const [addProductToCart] = mutateData({ url: '/api/cart', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: product?.id, quantity })
 
     const onChangeQuantity = (changeType: 'ADD' | 'MINUS') => setQuantity(prev => changeType === 'ADD' ? prev + 1 : prev - 1);
@@ -114,7 +115,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
     )
 }
 export async function getServerSideProps({ query: { id } }: { query: { id: string } }) {
-    const response = await loadDataRequest({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' });
+    const response = await loadData<IProductResponse>({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' });
     return {
         props: {
             product: response?.product

@@ -4,11 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
 import { FieldErrors, useForm } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
-import { actionDataRequest } from '@libs/client/useCallApi';
+import { loadData, mutateData } from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
 import SearchAddress from '@components/Address';
 import { useSWRConfig } from 'swr';
 import Popup from '@components/Popup';
+import { IDataExistResponse } from 'pages/api/user/dataExist';
 
 interface IForm {
     [key: string]: any,
@@ -20,16 +21,16 @@ interface IForm {
     contact?: string,
     address?: string,
 }
+interface IDataExist extends Omit<IDataExistResponse, 'ok'> { }
 const Join: NextPage = () => {
     const { mutate: loggedMutate } = useSWRConfig();
     const router = useRouter();
     const [address, setAddress] = useState('');
     const [addressPopupOpen, setAddressPopupOpen] = useState(false);
     const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
+    const [dataExist, setDataExist] = useState<IDataExist | null>(null);
 
-    // To fetch data
-    const [createUser, { data: createUserData }] = actionDataRequest({ url: '/api/user/join', method: 'POST' });
-    const [checkExist, { data: checkExistData }] = actionDataRequest({ url: '/api/user/dataExist', method: 'POST' });
+    const [createUser, { data: createUserData }] = mutateData({ url: '/api/user/join', method: 'POST' });
 
     // To open validation.
     const idValidateArea: React.MutableRefObject<any> = useRef();
@@ -55,19 +56,25 @@ const Join: NextPage = () => {
     useEffect(() => setAddressPopupOpen(false), [address])
 
     // Handle events involving fetching data and some work related to its response.
-    const onCheckExist = (data: { [key: string]: any }) => checkExist(data);
+    const onCheckExist = async (data: { [key: string]: any }) => {
+        const response = await loadData<IDataExistResponse>({ url: '/api/user/dataExist', data });
+        if (!response.ok) return;
+        if (!response?.isIdExist && !response?.isEmailExist) {
+            alert('사용이 가능합니다');
+            setDataExist(null);
+        }
+        else {
+            alert(`이미 등록된 ${response?.isIdExist ? '아이디' : '이메일'}입니다`);
+            setDataExist(prev => ({ ...prev, isIdExist: response.isIdExist, isEmailExist: response.isEmailExist }))
+        }
+    }
     const onSubmit = (data: IForm) => createUser(data);
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
-        if (!createUserData?.ok) return;
+        if (!createUserData.ok) return;
         loggedMutate('/api/user');
         router.push('/');
     }, [createUserData]);
-    useEffect(() => {
-        if (!checkExistData?.ok) return;
-        if (!checkExistData?.isIdExist && !checkExistData?.isEmailExist) alert('사용이 가능합니다');
-        else alert(`이미 등록된 ${checkExistData?.isIdExist ? '아이디' : '이메일'}입니다`);
-    }, [checkExistData])
 
     // To make it easier for common styles to access to classNames.
     const className = {
@@ -100,7 +107,7 @@ const Join: NextPage = () => {
                             </div>
                             <div className='ml-[8.7rem] self-start hidden flex-col items-start text-xs' ref={idValidateArea}>
                                 <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
-                                <span className={`${!checkExistData ? 'text-black' : ((checkExistData?.isIdExist || !checkExistData?.ok) ? 'text-red-500' : 'text-green-500')}`}>아이디 중복확인</span>
+                                <span className={`${!dataExist ? 'text-black' : ((dataExist?.isIdExist) ? 'text-red-500' : 'text-green-500')}`}>아이디 중복확인</span>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>

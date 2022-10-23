@@ -2,27 +2,28 @@ import { useState } from "react"
 
 interface ICallApiArgs {
     url: string;
-    method: string;
+    method?: string;
     data?: any
 }
-interface IDataResponse {
-    [key: string]: any,
+interface IMutateState<T> {
+    loading: boolean;
+    data: T;
+    error?: string;
+}
+export interface IDataResponse {
     ok: boolean
 }
-interface IActionDataState {
-    loading?: boolean;
-    data?: IDataResponse;
-    error?: object;
-}
 
-export function actionDataRequest({ url, method }: ICallApiArgs): [(data?: any) => void, IActionDataState] {
-    const [state, setState] = useState<IActionDataState>({
+export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApiArgs): [(data?: any) => void, IMutateState<T>] {
+    const [state, setState] = useState<IMutateState<T>>({
         loading: false,
-        data: undefined,
+        data: {
+            ok: false
+        } as T,
         error: undefined
     })
 
-    function callApi(_data?: any) {
+    function callApi(_data?: S) {
         fetchData({ url, method, data: _data })
             .then(response => response.json())
             .then(data => setState(prev => ({ ...prev, data })))
@@ -31,8 +32,8 @@ export function actionDataRequest({ url, method }: ICallApiArgs): [(data?: any) 
     return [callApi, { ...state }]
 }
 
-export function loadDataRequest({ url, method, data }: ICallApiArgs) {
-    return fetchData({ url, method, data }).then(response => response.json());
+export function loadData<T extends IDataResponse>({ url, data }: ICallApiArgs): Promise<T> {
+    return fetchData({ url, method: 'GET', data }).then(response => response.json());
 }
 
 function fetchData({ url, method, data }: ICallApiArgs): Promise<Response> {

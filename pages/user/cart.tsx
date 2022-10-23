@@ -2,8 +2,7 @@ import SearchAddress from '@components/Address';
 import CartProduct from '@components/Cart/CartProduct';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { actionDataRequest, loadDataRequest } from '@libs/client/useCallApi';
-import { withGetSessionSsr } from '@libs/server/withSession';
+import { mutateData, loadData } from '@libs/client/useCallApi';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
@@ -14,10 +13,14 @@ interface ICartProps {
     address?: string
 }
 const Cart: NextPage<ICartProps> = ({ address }) => {
-    const { data: cartProductsData, isValidating, mutate } = useSWR('/api/cart/loadCartProducts');
+    const { data: cartProductsData, isValidating, mutate } = useSWR('/api/cart');
+    const userData = loadData({ url: '/api/user?field=address' })
+    // Address
     const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
     const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
-    const [setDBShippingAddress] = actionDataRequest({ url: '/api/user/address', method: 'POST' });
+    const [setDBShippingAddress] = mutateData({ url: '/api/user', method: 'PATCH' });
+
+    // Selected Product
     const [selectedProductSum, setSelectedProductSum] = useState(0);
     const [selectedSalesPriceSum, setSelectedSalesPriceSum] = useState(0);
     useEffect(() => { mutate() }, []);
@@ -116,18 +119,4 @@ const SelectDeleteProduct = () => {
         </div>
     )
 }
-export const getServerSideProps = withGetSessionSsr(
-    async function getServerSideProps({ req }) {
-        const { session: { user: loggedUser } } = req;
-        if (!loggedUser) {
-            return { props: {} }
-        }
-        const response = await loadDataRequest({ url: `${process.env.SERVER_BASEURL}/api/user/userInfo`, method: 'POST', data: { id: loggedUser.id } });
-        return {
-            props: {
-                address: response?.address
-            }
-        };
-    },
-);
 export default Cart;
