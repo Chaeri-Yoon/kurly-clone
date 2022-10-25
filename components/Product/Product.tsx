@@ -1,6 +1,6 @@
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { actionDataRequest } from "@libs/client/useCallApi";
+import { mutateData } from "@libs/client/useCallApi";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +13,7 @@ interface IProduct {
     originalPrice: number
 }
 export default function ({ id, imgUrl, name, salePercentage, originalPrice }: IProduct) {
-    const [addProductToCart] = actionDataRequest({ url: '/api/cart/addCartProduct', method: 'POST' });
+    const [addProductToCart] = mutateData({ url: '/api/cart', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: id, quantity: 1 })
     return (
         <div className="w-[calc(25%-0.8rem)] inline-block cursor-pointer relative">

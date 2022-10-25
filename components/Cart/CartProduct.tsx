@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { actionDataRequest } from "@libs/client/useCallApi";
+import { mutateData } from "@libs/client/useCallApi";
 import { useSWRConfig } from "swr";
 
 interface ICartProduct {
@@ -20,40 +20,39 @@ interface ICartProduct {
 }
 export default function ({ id, name, image, quantity, salePercentage, originalPrice, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
     const [toggleSelect, setToggleSelect] = useState(true);
-    const [changedQuantity, setChangedQuantity] = useState<{ type: 'ADD' | 'MINUS' | null, value: number, prev: number }>({ type: null, value: quantity, prev: quantity - 1 });
     const { mutate: cartProductsMutate } = useSWRConfig();
-    const [deleteCartProduct] = actionDataRequest({ url: '/api/cart/deleteCartProduct', method: 'POST' });
-    const [modifyCartProduct] = actionDataRequest({ url: '/api/cart/modifyCartProduct', method: 'POST' });
+    const [deleteCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'DELETE' });
+    const [modifyCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'PATCH' });
     const saledPrice = (1 - (salePercentage * 0.01)) * originalPrice;
 
     const onProductSelected = () => setToggleSelect(prev => !prev);
     const onProductDelete = () => {
-        cartProductsMutate('/api/cart/loadCartProducts', (prev: any) => {
+        cartProductsMutate('/api/cart', (prev: any) => {
             const newCartProductLists = prev?.products?.filter((data: any) => data.product.id !== id);
             return { ...prev, products: newCartProductLists }
         }, false);
-        deleteCartProduct({ productId: id })
+        deleteCartProduct()
     }
     const onProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
-        setChangedQuantity(prevData => { return { type: changeType, value: changeType === 'ADD' ? prevData.value + 1 : prevData.value - 1, prev: prevData.value } });
+        const newQuantity = quantity + ((changeType === 'MINUS' ? -1 : 1) * 1);
+        cartProductsMutate('/api/cart', (prev: any) => {
+            const cartList = prev.cartList;
+            cartList.some((_, index: number) => {
+                const isSelected = cartList[index]._id === id;
+                if (isSelected) cartList[index].quantity = newQuantity;
+                return isSelected;
+            })
+            return { ...prev, cartList: [...cartList] };
+        }, false);
+        modifyCartProduct({ quantity });
     }
-    const sumsUpdate = (isSelected: boolean, isQuantityUpdated = false) => {
-        if (!isSelected && isQuantityUpdated) return;
-        const quantityDiff = isQuantityUpdated ? Math.abs(changedQuantity.value - changedQuantity.prev) : changedQuantity.value;
-        setSelectedProductSum(prev => (isQuantityUpdated ? changedQuantity.type === 'ADD' : isSelected) ? prev + (quantityDiff * saledPrice) : prev - (quantityDiff * saledPrice));
-        setSelectedSalesPriceSum(prev => (isQuantityUpdated ? changedQuantity.type === 'ADD' : isSelected) ? prev + (quantityDiff * (originalPrice - saledPrice)) : prev - (quantityDiff * (originalPrice - saledPrice)));
+    useEffect(() => {
+        sumsUpdate();
+    }, [toggleSelect, quantity])
+    const sumsUpdate = () => {
+        setSelectedProductSum(prev => prev + (quantity * originalPrice) * (toggleSelect ? 1 : -1))
+        setSelectedSalesPriceSum(prev => prev + (quantity * (originalPrice - saledPrice)) * (toggleSelect ? 1 : -1))
     }
-    useEffect(() => {
-        sumsUpdate(toggleSelect);
-    }, [toggleSelect]);
-    useEffect(() => {
-        if (changedQuantity.type === null) return;
-        sumsUpdate(toggleSelect, true);
-        modifyCartProduct({ productId: id, quantity: changedQuantity.value });
-    }, [changedQuantity])
-    useEffect(() => {
-        return () => sumsUpdate(false)
-    }, [])
     return (
         <div className="w-full flex justify-between items-center">
             <div className="w-1/2 flex justify-start items-center cursor-pointer">
@@ -70,8 +69,8 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
             <div className="w-1/2 flex justify-between items-center">
                 <div className="w-1/2 flex justify-end items-center">
                     <div className="px-3 py-[0.13rem] w-1/2 flex justify-between items-center border">
-                        <button className="disabled:text-gray-300" onClick={() => onProductChangeQuantity('MINUS')} disabled={changedQuantity.value === 1}><span>-</span></button>
-                        <span>{changedQuantity.value}</span>
+                        <button className="disabled:text-gray-300" onClick={() => onProductChangeQuantity('MINUS')} disabled={quantity === 1}><span>-</span></button>
+                        <span>{quantity}</span>
                         <button onClick={() => onProductChangeQuantity('ADD')}><span>+</span></button>
                     </div>
                 </div>

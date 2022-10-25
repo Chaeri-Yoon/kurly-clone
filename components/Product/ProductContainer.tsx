@@ -7,9 +7,9 @@ import { Product as ProductType } from '@prisma/client';
 
 interface IProductContainerProps {
     title: string,
-    recommendations: ProductType[]
+    products: ProductType[]
 }
-export default function ({ title, recommendations }: IProductContainerProps) {
+export default function ({ title, products }: IProductContainerProps) {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageWidth, setPageWidth] = useState(0);
     const pageFrame = useRef<HTMLDivElement | null>(null);
@@ -31,9 +31,9 @@ export default function ({ title, recommendations }: IProductContainerProps) {
             <div className="w-full relative ">
                 <div className="w-full overflow-hidden">
                     <div className='w-full whitespace-nowrap' ref={pageFrame}>
-                        {recommendations && [1, 1].map((_, i) =>
+                        {products && [1, 1].map((_, i) =>
                             <div key={i} className="w-full inline-block space-x-[1rem]">
-                                {recommendations.slice(4 * i, 4 * (i + 1)).map((product, j) => <Product key={4 * i + j} id={product.id} imgUrl={product.image} name={product.name} originalPrice={product.originalPrice} salePercentage={product.salePercentage} />)}
+                                {products.slice(4 * i, 4 * (i + 1)).map((product, j) => <Product key={4 * i + j} id={product.id} imgUrl={product.image} name={product.name} originalPrice={product.originalPrice} salePercentage={product.salePercentage} />)}
                             </div>
                         )}
                     </div>

@@ -3,10 +3,7 @@ import carousel from "@libs/client/carousel";
 import MoveCarouselButton from "../MoveCarouselButton";
 import Ad from "./AutoMoveAd";
 
-interface IAdContainerProps {
-    salePromoImages: string[]
-}
-export default function AdContainer({ salePromoImages }: IAdContainerProps) {
+export default function AdContainer({ promos }: { promos: string[] }) {
     const [salePromoIndex, setSalePromoIndex] = useState(1);
     const [salePromoWidth, setSalePromoWidth] = useState(0);
     const [autoMoveTimeout, setAutoMoveTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -20,7 +17,7 @@ export default function AdContainer({ salePromoImages }: IAdContainerProps) {
         autoMoveTimeout,
         setAutoMoveTimeout,
         frame: salePromoFrame,
-        itemsLength: salePromoImages.length,
+        itemsLength: promos.length,
         defaultTransitionTime: 0.4
     });
     useEffect(initialSetting, []);
@@ -39,8 +36,8 @@ export default function AdContainer({ salePromoImages }: IAdContainerProps) {
             <div className='w-full h-full' >
                 <div className='relative w-full h-full overflow-hidden group'>
                     <ul className='w-full h-full whitespace-nowrap list-none' ref={salePromoFrame}>
-                        {salePromoImages?.map((imageUrl: string, i: number) => (
-                            <Ad id={i} key={i} imageUrl={imageUrl} arrFilenames={salePromoImages} />
+                        {promos?.map((imageUrl: string, i: number) => (
+                            <Ad id={i} key={i} imageUrl={imageUrl} arrFilenames={promos} />
                         ))}
                     </ul>
                     <MoveCarouselButton isLeft={true} inverseIconColor={true} opacityStyle={true} onClick={onClickedBack} containerStyle={'left-4'} />
