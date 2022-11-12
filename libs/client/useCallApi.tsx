@@ -17,9 +17,7 @@ export interface IDataResponse {
 export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApiArgs): [(data?: any) => void, IMutateState<T>] {
     const [state, setState] = useState<IMutateState<T>>({
         loading: false,
-        data: {
-            ok: false
-        } as T,
+        data: {} as T,
         error: undefined
     })
 

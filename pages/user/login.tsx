@@ -24,6 +24,7 @@ const Login: NextPage = () => {
         FORM_ELEMENT: 'w-full p-4 border rounded-[0.2rem]'
     }
     useEffect(() => {
+        if (Object.keys(data).length === 0) return;
         if (!data.ok) alert(`${data.message || 'Something went wrong.'}`);
         else {
             loggedMutate('/api/user');
