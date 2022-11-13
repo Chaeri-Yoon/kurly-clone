@@ -18,7 +18,7 @@ export default function ({ loggedUser }: { loggedUser?: ILoggedUser }) {
     const onLogout = () => logout();
     useEffect(() => {
         if (!data.ok) return;
-        loggedMutate('/api/user');
+        loggedMutate('/api/user?field=name');
         router.push('/');
     }, [data]);
     return (

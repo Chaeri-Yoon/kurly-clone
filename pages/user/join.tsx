@@ -72,7 +72,7 @@ const Join: NextPage = () => {
     const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
         if (!createUserData.ok) return;
-        loggedMutate('/api/user');
+        loggedMutate('/api/user?field=name');
         router.push('/');
     }, [createUserData]);
 

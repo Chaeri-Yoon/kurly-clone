@@ -27,7 +27,7 @@ const Login: NextPage = () => {
         if (Object.keys(data).length === 0) return;
         if (!data.ok) alert(`${data.message || 'Something went wrong.'}`);
         else {
-            loggedMutate('/api/user');
+            loggedMutate('/api/user?field=name');
             router.push('/');
         }
     }, [data]);
