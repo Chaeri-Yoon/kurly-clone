@@ -2,28 +2,37 @@ import SearchAddress from '@components/Address';
 import CartProduct from '@components/Cart/CartProduct';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { mutateData, loadData } from '@libs/client/useCallApi';
+import { mutateData, loadData, IDataResponse } from '@libs/client/useCallApi';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 import Popup from 'reactjs-popup';
 import useSWR from 'swr';
 
-interface ICartProps {
-    address?: string
+interface IUserAddress extends IDataResponse {
+    loggedUser: {
+        id: string,
+        address: string
+    }
 }
-const Cart: NextPage<ICartProps> = ({ address }) => {
+const Cart: NextPage = () => {
     const { data: cartProductsData, isValidating, mutate } = useSWR('/api/cart');
-    const userData = loadData({ url: '/api/user?field=address' })
+
     // Address
-    const [shippingAddress, setShippingAddress] = useState(`${address || ''}`);
+    const [shippingAddress, setShippingAddress] = useState('');
     const [isAddressPopupOpen, setIsAddressPopupOpen] = useState(false);
     const [setDBShippingAddress] = mutateData({ url: '/api/user', method: 'PATCH' });
 
     // Selected Product
     const [selectedProductSum, setSelectedProductSum] = useState(0);
     const [selectedSalesPriceSum, setSelectedSalesPriceSum] = useState(0);
-    useEffect(() => { mutate() }, []);
+
+    useEffect(() => {
+        (async () => {
+            const response = await loadData<IUserAddress>({ url: '/api/user?field=address' })
+            setShippingAddress(response.loggedUser.address || '')
+        })();
+    }, [])
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
