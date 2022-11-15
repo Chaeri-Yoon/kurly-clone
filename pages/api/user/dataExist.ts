@@ -7,7 +7,9 @@ export interface IDataExistResponse {
     isEmailExist?: boolean
 }
 export default async function (req: NextApiRequest, res: NextApiResponse<IDataExistResponse>) {
-    const { body: { userId, email } } = req;
+    const { query } = req;
+    const userId = query.userId as string
+    const email = query.email as string
     try {
         const user = await client.user.findFirst({
             where: {

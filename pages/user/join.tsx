@@ -56,8 +56,8 @@ const Join: NextPage = () => {
     useEffect(() => setAddressPopupOpen(false), [address])
 
     // Handle events involving fetching data and some work related to its response.
-    const onCheckExist = async (data: { [key: string]: any }) => {
-        const response = await loadData<IDataExistResponse>({ url: '/api/user/dataExist', data });
+    const onCheckExist = async ({ userId, email }: { userId?: string, email?: string }) => {
+        const response = await loadData<IDataExistResponse>({ url: `/api/user/dataExist?${userId ? `userId=${userId}` : (email ? `email=${email}` : '')}` });
         if (!response.ok) return;
         if (!response?.isIdExist && !response?.isEmailExist) {
             alert('사용이 가능합니다');

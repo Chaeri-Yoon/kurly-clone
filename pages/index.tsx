@@ -20,8 +20,8 @@ const Home: NextPage<IHomeProps> = ({ promos, products }) => {
 }
 
 export async function getStaticProps() {
-  const salePromoImages = await loadData<IPromos>({ url: `${process.env.SERVER_BASEURL}/api/promos`, method: 'GET' });
-  const products = await loadData<IProducts>({ url: `${process.env.SERVER_BASEURL}/api/products`, method: 'GET' });
+  const salePromoImages = await loadData<IPromos>({ url: `${process.env.SERVER_BASEURL}/api/promos` });
+  const products = await loadData<IProducts>({ url: `${process.env.SERVER_BASEURL}/api/products` });
   return {
     props: {
       promos: salePromoImages.filenames,

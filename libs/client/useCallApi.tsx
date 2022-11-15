@@ -30,8 +30,8 @@ export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApi
     return [callApi, { ...state }]
 }
 
-export function loadData<T extends IDataResponse>({ url, data }: ICallApiArgs): Promise<T> {
-    return fetchData({ url, method: 'GET', data }).then(response => response.json());
+export function loadData<T extends IDataResponse>({ url }: ICallApiArgs): Promise<T> {
+    return fetchData({ url, method: 'GET' }).then(response => response.json());
 }
 
 function fetchData({ url, method, data }: ICallApiArgs): Promise<Response> {

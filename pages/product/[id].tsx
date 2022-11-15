@@ -115,7 +115,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
     )
 }
 export async function getServerSideProps({ query: { id } }: { query: { id: string } }) {
-    const response = await loadData<IProductResponse>({ url: `${process.env.SERVER_BASEURL}/api/product/${id}`, method: 'GET' });
+    const response = await loadData<IProductResponse>({ url: `${process.env.SERVER_BASEURL}/api/product/${id}` });
     return {
         props: {
             product: response?.product
