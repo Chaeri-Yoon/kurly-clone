@@ -27,7 +27,7 @@ const Join: NextPage = () => {
     const router = useRouter();
     const [address, setAddress] = useState('');
     const [addressPopupOpen, setAddressPopupOpen] = useState(false);
-    const { setValue, register, handleSubmit, formState: { errors }, watch } = useForm<IForm>({ mode: 'onChange' });
+    const { setValue, register, handleSubmit, formState: { errors }, watch, setError, clearErrors } = useForm<IForm>({ mode: 'onChange', criteriaMode: 'all' });
     const [dataExist, setDataExist] = useState<IDataExist | null>(null);
 
     const [createUser, { data: createUserData }] = mutateData({ url: '/api/user/join', method: 'POST' });
@@ -40,18 +40,19 @@ const Join: NextPage = () => {
         if (openArea === 'id') idValidateArea.current.style.display = 'flex';
         else passwordValidateArea.current.style.display = 'flex';
     }
+    const isPasswordMatchWithConfirm = (password1: string, password2: string) => {
+        const isMatch = password1 === password2;
+        if (isMatch) errors?.password_confirm && clearErrors('password_confirm');
+        else !errors?.password_confirm && setError('password_confirm', { type: 'validate' });
+        return isMatch;
+    }
 
     // To detect any change in the value of certain fields.
-    const userId: React.MutableRefObject<any> = useRef({});
-    const password: React.MutableRefObject<any> = useRef({});
-    const passwordConfirm: React.MutableRefObject<any> = useRef({});
-    const email: React.MutableRefObject<any> = useRef({});
-    const agreeAll: React.MutableRefObject<any> = useRef({});
-    userId.current = watch('userId', '');
-    password.current = watch('password', '');
-    passwordConfirm.current = watch('password_confirm', '');
-    email.current = watch('email', '');
-    agreeAll.current = watch('agree_all');
+    const userId = watch('userId', '');
+    const password = watch('password', '');
+    const passwordConfirm = watch('password_confirm', '');
+    const email = watch('email', '');
+    const agreeAll = watch('agree_all');
 
     useEffect(() => setAddressPopupOpen(false), [address])
 
@@ -61,6 +62,7 @@ const Join: NextPage = () => {
         if (!response.ok) return;
         if (!response?.isIdExist && !response?.isEmailExist) {
             alert('사용이 가능합니다');
+            clearErrors('userId');
             setDataExist(null);
         }
         else {
@@ -95,42 +97,46 @@ const Join: NextPage = () => {
                 <div className='w-[55%] max-w-[640px] flex flex-col items-center'>
                     <span className='mb-[0.6rem] self-end text-xs'><span className={`${className.REQUIRED} !-left-0.5`}>*</span>필수입력사항</span>
                     <form onSubmit={handleSubmit(onSubmit, onSubmitFailed)} className='w-full flex flex-col items-center'>
-                        <div className='p-5 w-full flex flex-col items-center text-sm space-y-5 border-y-2 border-black '>
+                        <div className='p-5 w-full flex flex-col items-center text-sm space-y-3 border-y-2 border-black '>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>아이디<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA} w-full`}>
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         <input onClick={() => openValidateArea('id')} {...register("userId", { required: true, minLength: 6 })} placeholder='6자 이상의 영문 혹은 영문과 숫자를 조합' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button type={'button'} onClick={() => onCheckExist({ userId: userId.current })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} onClick={() => onCheckExist({ userId })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
                             <div className='ml-[8.7rem] self-start hidden flex-col items-start text-xs' ref={idValidateArea}>
-                                <span className={`${(errors?.userId?.type === 'minLength' || userId.current.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
+                                <span className={`${(errors?.userId?.type === 'minLength' || userId.toString().length === 0) ? 'text-red-500' : 'text-green-500'}`}>6자 이상의 영문 혹은 영문과 숫자를 조합</span>
                                 <span className={`${!dataExist ? 'text-black' : ((dataExist?.isIdExist) ? 'text-red-500' : 'text-green-500')}`}>아이디 중복확인</span>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input type='password' {...register("password", { required: true, minLength: 10, validate: value => value === passwordConfirm.current })} placeholder='비밀번호를 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}>
+                                        <input onClick={() => openValidateArea('password')} {...register("password", {
+                                            required: true,
+                                            pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])./g,
+                                            minLength: 8, validate: (value) => isPasswordMatchWithConfirm(value, passwordConfirm)
+                                        })} placeholder='비밀번호를 입력해주세요' type='password' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                    </div>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>비밀번호확인<span className={`${className.REQUIRED}`}>*</span></span>
                                 <div className={`${className.DATA_AREA}`}>
-                                    <div className={`${className.INPUT_CONTAINER}`}><input onClick={() => openValidateArea('password')} onFocus={() => openValidateArea('password')} type='password' {...register("password_confirm", { required: true, minLength: 10, validate: value => value === password.current })} placeholder='비밀번호를 한번 더 입력해주세요' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} /></div>
+                                    <div className={`${className.INPUT_CONTAINER}`}>
+                                        <input {...register("password_confirm", {
+                                            required: true, validate: (value) => isPasswordMatchWithConfirm(value, password)
+                                        })} placeholder='비밀번호를 한번 더 입력해주세요' type='password' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
+                                    </div>
                                 </div>
                             </div>
                             <div className='ml-[8.7rem] self-start hidden flex-col items-start text-xs' ref={passwordValidateArea}>
-                                <span className={
-                                    `${(
-                                        passwordConfirm.current.toString().length === 0
-                                        || errors?.password?.type === 'minLength'
-                                        || errors?.password_confirm?.type === 'minLength'
-                                        || (password.current !== passwordConfirm.current)
-                                    ) ? 'text-red-500' : 'text-green-500'
-                                    }`
-                                }>동일한 비밀번호를 입력해주세요.</span>
+                                <span className={`${(errors?.password?.types?.pattern || password.length === 0) ? 'text-red-500' : 'text-green-500'}`}>Password should contain at least 1 uppercase, 1 lowercase, 1 number.</span>
+                                <span className={`${(errors?.password?.types?.minLength || password.length === 0) ? 'text-red-500' : 'text-green-500'}`}>Password should be longer than 8.</span>
+                                <span className={`${(errors?.password_confirm?.type === 'validate' || password.length === 0 || passwordConfirm.length === 0) ? 'text-red-500' : 'text-green-500'}`}>Password does not match.</span>
                             </div>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>이름<span className={`${className.REQUIRED}`}>*</span></span>
@@ -144,7 +150,7 @@ const Join: NextPage = () => {
                                     <div className={`${className.INPUT_CONTAINER}`}>
                                         <input type='email' {...register("email")} placeholder='예: marketkurly@kurly.com' className={`${className.DATA_AREA_CHILD} ${className.INPUT}`} />
                                     </div>
-                                    <button type={'button'} onClick={() => onCheckExist({ email: email.current })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
+                                    <button type={'button'} onClick={() => onCheckExist({ email })} className={`${className.DATA_AREA_CHILD} ${className.DATA_CONFIRM_BUTTON}`}>중복확인</button>
                                 </div>
                             </div>
                             <div className={`${className.ROW}`}>
