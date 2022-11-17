@@ -2,7 +2,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { faCircle, faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
-import { FieldErrors, useForm } from 'react-hook-form';
+import { FieldErrors, useForm, UseFormSetValue } from 'react-hook-form';
 import React, { useEffect, useRef, useState } from 'react';
 import { loadData, mutateData } from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
@@ -11,6 +11,13 @@ import { useSWRConfig } from 'swr';
 import Popup from '@components/Popup';
 import { IDataExistResponse } from 'pages/api/user/dataExist';
 
+interface IAgreeButton {
+    id: string,
+    required: boolean,
+    agree_allChecked: boolean,
+    setFormValue: UseFormSetValue<IForm>,
+    [key: string]: any
+}
 interface IForm {
     [key: string]: any,
     userId: string,
@@ -19,7 +26,7 @@ interface IForm {
     name: string,
     email: string,
     contact?: string,
-    address?: string,
+    address?: string
 }
 interface IDataExist extends Omit<IDataExistResponse, 'ok'> { }
 const Join: NextPage = () => {
@@ -52,7 +59,7 @@ const Join: NextPage = () => {
     const password = watch('password', '');
     const passwordConfirm = watch('password_confirm', '');
     const email = watch('email', '');
-    const agreeAll = watch('agree_all');
+    const agree_all = watch('agree_all', '');
 
     useEffect(() => setAddressPopupOpen(false), [address])
 
@@ -71,32 +78,18 @@ const Join: NextPage = () => {
         }
     }
     const onSubmit = (data: IForm) => createUser(data);
-    const onSubmitFailed = (error: FieldErrors<IForm>) => console.log(error);
     useEffect(() => {
         if (!createUserData.ok) return;
         loggedMutate('/api/user?field=name');
         router.push('/');
     }, [createUserData]);
-
-    // To make it easier for common styles to access to classNames.
-    const className = {
-        ROW: 'w-full flex justify-between items-center',
-        LABEL: 'w-[23%] font-semibold',
-        DATA_AREA: 'flex-1 flex justify-between items-center',
-        DATA_AREA_CHILD: 'py-[0.65rem] rounded-[0.2rem] border',
-        INPUT_CONTAINER: 'w-[70%] flex justify-start items-center',
-        INPUT: 'px-4 w-full',
-        DATA_CONFIRM_BUTTON: 'ml-2 flex-1 border-kurly-purple text-kurly-purple font-semibold',
-        CHECK_AREA_CHILD: 'flex-1 flex justify-between items-center',
-        REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5'
-    }
     return (
         <div className='p-5 pt-1 w-full flex justify-center items-center'>
             <div className='w-full flex flex-col items-center'>
                 <span className='pt-11 text-[1.75rem] font-semibold'>회원가입</span>
                 <div className='w-[55%] max-w-[640px] flex flex-col items-center'>
                     <span className='mb-[0.6rem] self-end text-xs'><span className={`${className.REQUIRED} !-left-0.5`}>*</span>필수입력사항</span>
-                    <form onSubmit={handleSubmit(onSubmit, onSubmitFailed)} className='w-full flex flex-col items-center'>
+                    <form onSubmit={handleSubmit(onSubmit)} className='w-full flex flex-col items-center'>
                         <div className='p-5 w-full flex flex-col items-center text-sm space-y-3 border-y-2 border-black '>
                             <div className={`${className.ROW}`}>
                                 <span className={`${className.LABEL}`}>아이디<span className={`${className.REQUIRED}`}>*</span></span>
@@ -190,34 +183,34 @@ const Join: NextPage = () => {
                             <div className={`flex-1 flex flex-col items-start space-y-3`}>
                                 <div className='w-full flex flex-col items-start'>
                                     <div className={`${className.ROW} !justify-start mb-1`}>
-                                        <AgreeButton fieldName='agree_all' {...{ 'register': { ...register('agree_all', { validate: value => value === true }) } }} />
+                                        <AgreeButton id="agree_all" required={true} agree_allChecked={agree_all} setFormValue={setValue} {...{ 'register': { ...register('agree_0') } }} />
                                         <span className='text-lg font-semibold'>전체 동의합니다.</span>
                                     </div>
                                     <span className='ml-[1.6rem] text-xs'>선택항목에 동의하지 않은 경우도 회원가입 및 일반적인 서비스를 이용할 수 있습니다.</span>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_1' {...{ 'register': { ...register('agree_1', { validate: value => value === true }) }, setValue, agreeAll }} />
+                                    <AgreeButton id="agree_1" required={true} agree_allChecked={agree_all} setFormValue={setValue} {...{ 'register': { ...register('agree_1', { validate: value => value === true }) } }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span>이용약관 동의 <span className='text-kurly-grey'>(필수)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_2' {...{ 'register': { ...register('agree_2', { validate: value => value === true }) }, setValue, agreeAll }} />
+                                    <AgreeButton id="agree_2" required={true} agree_allChecked={agree_all} setFormValue={setValue} {...{ 'register': { ...register('agree_2', { validate: value => value === true }) } }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(필수)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_option' {...{ 'register': { ...register('agree_option') }, setValue }} />
+                                    <AgreeButton id='agree_option' required={false} agree_allChecked={agree_all} setFormValue={setValue} {...{ 'register': { ...register('agree_option') } }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span >개인정보 수집·이용 동의 <span className='text-kurly-grey'>(선택)</span></span>
                                         <button type={'button'} className='text-kurly-purple'>{'약관보기 >'}</button>
                                     </div>
                                 </div>
                                 <div className={`${className.ROW}`}>
-                                    <AgreeButton fieldName='agree_3' {...{ 'register': { ...register('agree_3', { validate: value => value === true }) }, setValue, agreeAll }} />
+                                    <AgreeButton id="agree_3" required={true} agree_allChecked={agree_all} setFormValue={setValue} {...{ 'register': { ...register('agree_3', { validate: value => value === true }) } }} />
                                     <div className={`${className.CHECK_AREA_CHILD}`}>
                                         <span> 본인은 만 14세 이상입니다. <span className='text-kurly-grey'>(필수)</span></span>
                                     </div>
@@ -231,26 +224,32 @@ const Join: NextPage = () => {
         </div>
     )
 }
-
-const AgreeButton = (props: { [key: string]: any, fieldName: string }) => {
-    const { fieldName, ...rest } = props;
-    const { setValue, agreeAll } = rest;
-    const [isAgreed, setIsAgreed] = useState(false);
-    const changeAgreeState = (changedByAgreeAll = false) => changedByAgreeAll ? setIsAgreed(agreeAll?.current) : setIsAgreed(prev => !prev);
-    useEffect(() => {
-        if (fieldName === 'agree_all') return;
-        changeAgreeState(true);
-        setValue(fieldName, agreeAll?.current);
-    }, [agreeAll?.current])
-
+// To check required terms.
+const AgreeButton = (props: IAgreeButton) => {
+    const { id, required, agree_allChecked, setFormValue, ...rest } = props;
+    const [isChecked, setIsChecked] = useState(false);
+    const handleChecked = () => setIsChecked(prev => !prev);
+    useEffect(() => setFormValue(id, isChecked), [isChecked]);
+    useEffect(() => { if (required) setIsChecked(agree_allChecked) }, [agree_allChecked]);
     return (
         <>
-            <input type='checkbox' id={fieldName} onClick={() => changeAgreeState()} {...rest.register} className='mr-3 relative text-2xl' />
-            <label htmlFor={fieldName} className='absolute bg-white'>
-                <FontAwesomeIcon icon={isAgreed ? faCircleCheck : faCircle} className='' />
+            <input type='checkbox' id={id} onClick={handleChecked} {...rest.register} className='mr-3 relative text-2xl' />
+            <label htmlFor={id} className='absolute bg-white'>
+                <FontAwesomeIcon icon={isChecked ? faCircleCheck : faCircle} className='' />
             </label>
         </>
     )
 }
-
+// To make it easier for common styles to access to classNames.
+const className = {
+    ROW: 'w-full flex justify-between items-center',
+    LABEL: 'w-[23%] font-semibold',
+    DATA_AREA: 'flex-1 flex justify-between items-center',
+    DATA_AREA_CHILD: 'py-[0.65rem] rounded-[0.2rem] border',
+    INPUT_CONTAINER: 'w-[70%] flex justify-start items-center',
+    INPUT: 'px-4 w-full',
+    DATA_CONFIRM_BUTTON: 'ml-2 flex-1 border-kurly-purple text-kurly-purple font-semibold',
+    CHECK_AREA_CHILD: 'flex-1 flex justify-between items-center',
+    REQUIRED: 'text-red-500 text-[0.6rem] font-thin relative -top-1 left-0.5'
+}
 export default Join;
