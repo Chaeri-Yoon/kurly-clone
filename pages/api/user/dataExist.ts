@@ -3,8 +3,8 @@ import { NextApiRequest, NextApiResponse } from "next"
 
 export interface IDataExistResponse {
     ok: boolean,
-    isIdExist?: boolean,
-    isEmailExist?: boolean
+    idCheckPass?: boolean,
+    emailCheckPass?: boolean
 }
 export default async function (req: NextApiRequest, res: NextApiResponse<IDataExistResponse>) {
     const { query } = req;
@@ -18,8 +18,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse<IDataEx
         });
         res.json({
             ok: true,
-            isIdExist: user ? (userId ? true : false) : false,
-            isEmailExist: user ? (email ? true : false) : false
+            idCheckPass: !(userId && user),
+            emailCheckPass: !(email && user),
         })
     } catch (error) {
         console.log(error);
