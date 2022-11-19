@@ -12,6 +12,7 @@ interface IMutateState<T> {
 }
 export interface IDataResponse {
     ok: boolean
+    message?: string
 }
 
 export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApiArgs): [(data?: any) => void, IMutateState<T>] {
@@ -22,6 +23,7 @@ export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApi
     })
 
     function callApi(_data?: S) {
+        setState(prev => ({ ...prev, loading: true }));
         fetchData({ url, method, data: _data })
             .then(response => response.json())
             .then(data => setState(prev => ({ ...prev, data })))

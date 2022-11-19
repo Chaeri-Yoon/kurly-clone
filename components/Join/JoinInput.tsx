@@ -11,7 +11,6 @@ interface IJoinInput {
 
 export default ({ children, input }: { children: JSX.Element, input: IJoinInput }) => {
     const [startValidate, setStartValidate] = useState(false);
-    useEffect(() => console.log(startValidate), [startValidate]);
     const openValidationArea = input.validations && <DataValidationArea fieldErrors={[...input.validations]} />
     const handleStartValidate = () => setStartValidate(true);
     return (

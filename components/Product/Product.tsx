@@ -1,4 +1,4 @@
-import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
+import { faCartShopping, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mutateData } from "@libs/client/useCallApi";
 
@@ -13,7 +13,7 @@ interface IProduct {
     originalPrice: number
 }
 export default function ({ id, imgUrl, name, salePercentage, originalPrice }: IProduct) {
-    const [addProductToCart] = mutateData({ url: '/api/cart', method: 'POST' });
+    const [addProductToCart, { loading: addProductToCartLoading }] = mutateData({ url: '/api/cart', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: id, quantity: 1 })
     return (
         <div className="w-[calc(25%-0.8rem)] inline-block cursor-pointer relative">
@@ -23,8 +23,8 @@ export default function ({ id, imgUrl, name, salePercentage, originalPrice }: IP
                         <Image src={imgUrl} layout="fill"></Image>
                     </a>
                 </Link>
-                <button onClick={() => onAddToCartClicked()} className="absolute bottom-2 right-2 flex justify-center items-center w-1/6 aspect-square rounded-full z-10 bg-kurly-purple opacity-50 active:opacity-100">
-                    <FontAwesomeIcon icon={faCartShopping} inverse />
+                <button onClick={() => onAddToCartClicked()} className="absolute bottom-2 right-2 flex justify-center items-center w-1/6 aspect-square rounded-full z-10 bg-kurly-purple opacity-50 hover:opacity-100 active:opacity-100">
+                    <FontAwesomeIcon icon={addProductToCartLoading ? faCheck : faCartShopping} inverse />
                 </button>
             </div>
             <Link href={`/product/${id}`}>

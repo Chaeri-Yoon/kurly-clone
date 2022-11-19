@@ -18,7 +18,7 @@ interface IProductDetail {
 }
 const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
     const [quantity, setQuantity] = useState(1);
-    const [addProductToCart] = mutateData({ url: '/api/cart', method: 'POST' });
+    const [addProductToCart, { loading: addToCartLoading }] = mutateData({ url: '/api/cart', method: 'POST' });
     const onAddToCartClicked = () => addProductToCart({ productId: product?.id, quantity })
 
     const onChangeQuantity = (changeType: 'ADD' | 'MINUS') => setQuantity(prev => changeType === 'ADD' ? prev + 1 : prev - 1);
@@ -104,7 +104,7 @@ const ProductDetail: NextPage<IProductDetail> = ({ product }) => {
                             <div className='w-full h-14 flex justify-start items-center space-x-2'>
                                 <button className='h-full aspect-square border rounded-md'><FontAwesomeIcon icon={faHeart} color='#999' size='2x' /></button>
                                 <button className='h-full aspect-square border rounded-md'><FontAwesomeIcon icon={faBell} color='#999' size='2x' /></button>
-                                <button onClick={() => onAddToCartClicked()} className='h-full flex-1  bg-kurly-purple text-white text-base'>장바구니 담기</button>
+                                <button onClick={() => onAddToCartClicked()} className='h-full flex-1 border-kurly-purple border-[1px] font-bold bg-kurly-purple text-white text-base hover:bg-white hover:text-kurly-purple'>{addToCartLoading ? 'Loading...' : '장바구니 담기'}</button>
                             </div>
                         </div>
                     </div>
