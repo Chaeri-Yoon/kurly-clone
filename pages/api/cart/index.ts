@@ -1,8 +1,16 @@
+import { IDataResponse } from "@libs/client/useCallApi";
 import client from "@libs/server/client";
 import { withApiSession } from "@libs/server/withSession";
+import { Product } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export interface ICartProductsResponse extends IDataResponse {
+    products?: {
+        product: Product;
+        quantity: number;
+    }[]
+}
+async function handler(req: NextApiRequest, res: NextApiResponse<ICartProductsResponse>) {
     const { session: { user } } = req;
     if (!user) {
         return res.json({
@@ -21,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                     quantity: true
                 }
             })
-            res.json({
+            return res.json({
                 ok: true,
                 products: findUserCartProducts
             })

@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { mutateData, loadData, IDataResponse } from '@libs/client/useCallApi';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
+import { ICartProductsResponse } from 'pages/api/cart';
 import { useEffect, useState } from 'react';
 import Popup from 'reactjs-popup';
 import useSWR from 'swr';
@@ -16,7 +17,7 @@ interface IUserAddress extends IDataResponse {
     }
 }
 const Cart: NextPage = () => {
-    const { data: cartProductsData, isValidating, mutate } = useSWR('/api/cart');
+    const { data: cartProductsData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
 
     // Address
     const [shippingAddress, setShippingAddress] = useState('');

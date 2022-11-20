@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { mutateData } from "@libs/client/useCallApi";
 import { useSWRConfig } from "swr";
+import { ICartProductsResponse } from "pages/api/cart";
 
 interface ICartProduct {
     id: number,
@@ -27,28 +28,29 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
 
     const onProductSelected = () => setToggleSelect(prev => !prev);
     const onProductDelete = () => {
-        cartProductsMutate('/api/cart', (prev: any) => {
-            const newCartProductLists = prev?.products?.filter((data: any) => data.product.id !== id);
-            return { ...prev, products: newCartProductLists }
-        }, false);
-        deleteCartProduct()
+        setToggleSelect(false);
+        setTimeout(() => {
+            cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
+                const newCartProductLists = prev?.products?.filter(data => data.product.id !== id);
+                return { ...prev, products: newCartProductLists }
+            }, false);
+            deleteCartProduct()
+        }, 1000);
     }
     const onProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
         const newQuantity = quantity + ((changeType === 'MINUS' ? -1 : 1) * 1);
-        cartProductsMutate('/api/cart', (prev: any) => {
-            const cartList = prev.cartList;
-            cartList.some((_, index: number) => {
-                const isSelected = cartList[index]._id === id;
+        cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
+            const cartList = prev.products;
+            cartList?.some((_, index: number) => {
+                const isSelected = cartList[index].product.id === id;
                 if (isSelected) cartList[index].quantity = newQuantity;
                 return isSelected;
             })
-            return { ...prev, cartList: [...cartList] };
+            return { ...prev, products: [...cartList!] };
         }, false);
         modifyCartProduct({ quantity });
     }
-    useEffect(() => {
-        sumsUpdate();
-    }, [toggleSelect, quantity])
+    useEffect(() => sumsUpdate(), [toggleSelect, quantity])
     const sumsUpdate = () => {
         setSelectedProductSum(prev => prev + (quantity * originalPrice) * (toggleSelect ? 1 : -1))
         setSelectedSalesPriceSum(prev => prev + (quantity * (originalPrice - saledPrice)) * (toggleSelect ? 1 : -1))
