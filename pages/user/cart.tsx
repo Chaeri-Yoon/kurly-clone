@@ -17,7 +17,7 @@ interface IUserAddress extends IDataResponse {
     }
 }
 const Cart: NextPage = () => {
-    const { data: cartProductsData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
+    const { data: cartData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
 
     // Address
     const [shippingAddress, setShippingAddress] = useState('');
@@ -49,13 +49,13 @@ const Cart: NextPage = () => {
                         {
                             isValidating
                                 ? <span className='w-full text-center self-center text-base'>장바구니를 로드 중입니다.</span>
-                                : (!cartProductsData || cartProductsData?.products?.length === 0 ? (
+                                : (!cartData || cartData?.products?.length === 0 ? (
                                     <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
                                 ) : (
                                     <div className='w-full flex flex-col'>
                                         <span className='text-lg'>냉장 상품</span>
                                         <div className='w-full flex flex-col space-y-12'>
-                                            {cartProductsData?.products?.map((element: { product: Product, quantity: number }) =>
+                                            {cartData?.products?.map((element: { product: Product, quantity: number }) =>
                                                 <CartProduct
                                                     key={element?.product?.id}
                                                     id={element?.product?.id}
@@ -102,7 +102,7 @@ const Cart: NextPage = () => {
                                 <span>${selectedProductSum.toFixed(2)}</span>
                                 <span>${selectedSalesPriceSum.toFixed(2)}</span>
                                 <span>${selectedProductSum >= 30 ? 0 : '5'}</span>
-                                <span>$<span className='text-[1.38rem]'>{selectedProductSum >= 30 ? selectedProductSum.toFixed(2) : (5 + selectedProductSum).toFixed(2)}</span></span>
+                                <span>$<span className='text-[1.38rem]'>{selectedProductSum >= 30 ? (selectedProductSum - selectedSalesPriceSum).toFixed(2) : (5 + (selectedProductSum - selectedSalesPriceSum)).toFixed(2)}</span></span>
                             </div>
                         </div>
                     </div>

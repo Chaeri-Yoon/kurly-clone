@@ -28,14 +28,11 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
 
     const onProductSelected = () => setToggleSelect(prev => !prev);
     const onProductDelete = () => {
-        setToggleSelect(false);
-        setTimeout(() => {
-            cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
-                const newCartProductLists = prev?.products?.filter(data => data.product.id !== id);
-                return { ...prev, products: newCartProductLists }
-            }, false);
-            deleteCartProduct()
-        }, 1000);
+        cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
+            const newCartProductLists = prev?.products?.filter(data => data.product.id !== id);
+            return { ...prev, products: newCartProductLists }
+        }, false);
+        deleteCartProduct()
     }
     const onProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
         const newQuantity = quantity + ((changeType === 'MINUS' ? -1 : 1) * 1);
@@ -49,11 +46,20 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
             return { ...prev, products: [...cartList!] };
         }, false);
         modifyCartProduct({ quantity });
+        sumsUpdate({ type: changeType })
     }
-    useEffect(() => sumsUpdate(), [toggleSelect, quantity])
-    const sumsUpdate = () => {
-        setSelectedProductSum(prev => prev + (quantity * originalPrice) * (toggleSelect ? 1 : -1))
-        setSelectedSalesPriceSum(prev => prev + (quantity * (originalPrice - saledPrice)) * (toggleSelect ? 1 : -1))
+    useEffect(() => {
+        return () => {
+            setSelectedProductSum(prev => prev - (quantity * originalPrice))
+            setSelectedSalesPriceSum(prev => prev - (quantity * (originalPrice - saledPrice)))
+        }
+    }, [])
+    useEffect(() => sumsUpdate({ type: 'toggle' }), [toggleSelect])
+    const sumsUpdate = ({ type }: { type: 'MINUS' | 'ADD' | 'toggle' }) => {
+        const operator = type === 'toggle' ? (toggleSelect ? quantity : -quantity) : (toggleSelect ? (type === 'ADD' ? 1 : -1) : 0);
+        if (operator === 0) return;
+        setSelectedProductSum(prev => prev + originalPrice * operator)
+        setSelectedSalesPriceSum(prev => prev + (originalPrice - saledPrice) * operator)
     }
     return (
         <div className="w-full flex justify-between items-center">
