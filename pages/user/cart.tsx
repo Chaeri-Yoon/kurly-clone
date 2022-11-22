@@ -1,12 +1,13 @@
 import SearchAddress from '@components/Address';
 import CartProduct from '@components/Cart/CartProduct';
 import { faCircleCheck, faLocationPin } from '@fortawesome/free-solid-svg-icons';
+import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { mutateData, loadData, IDataResponse } from '@libs/client/useCallApi';
 import { Cart, Product } from '@prisma/client';
 import type { NextPage } from 'next';
 import { ICartProductsResponse } from 'pages/api/cart';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Popup from 'reactjs-popup';
 import useSWR from 'swr';
 
@@ -17,7 +18,8 @@ interface IUserAddress extends IDataResponse {
     }
 }
 const Cart: NextPage = () => {
-    const { data: cartData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
+    const { data: cartData, isValidating, mutate } = useSWR<ICartProductsResponse>('/api/cart');
+    const [allProductSelect, setAllProductSelect] = useState(true);
 
     // Address
     const [shippingAddress, setShippingAddress] = useState('');
@@ -42,7 +44,7 @@ const Cart: NextPage = () => {
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
-            <SelectDeleteProduct />
+            <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} />
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
                     <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
@@ -52,8 +54,7 @@ const Cart: NextPage = () => {
                                 : (!cartData || cartData?.products?.length === 0 ? (
                                     <span className='w-full text-center self-center text-base'>장바구니에 담긴 상품이 없습니다</span>
                                 ) : (
-                                    <div className='w-full flex flex-col'>
-                                        <span className='text-lg'>냉장 상품</span>
+                                    <div className='my-3 w-full flex flex-col'>
                                         <div className='w-full flex flex-col space-y-12'>
                                             {cartData?.products?.map((element: { product: Product, quantity: number }) =>
                                                 <CartProduct
@@ -64,6 +65,7 @@ const Cart: NextPage = () => {
                                                     quantity={element?.quantity}
                                                     salePercentage={element?.product?.salePercentage}
                                                     originalPrice={element?.product?.originalPrice}
+                                                    selectedByAll={allProductSelect}
                                                     setSelectedProductSum={setSelectedProductSum}
                                                     setSelectedSalesPriceSum={setSelectedSalesPriceSum}
                                                 />)}
@@ -73,7 +75,7 @@ const Cart: NextPage = () => {
                                 )
                         }
                     </div>
-                    <SelectDeleteProduct />
+                    <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} />
                 </div>
                 <div className='w-[27.3%] flex flex-col items-start text-base'>
                     <div className='w-full flex flex-col items-center border'>
@@ -117,12 +119,14 @@ const Cart: NextPage = () => {
         </div>
     )
 };
-const SelectDeleteProduct = () => {
+const ProductActionByAll = ({ allProductSelect, setAllProductSelect }: { allProductSelect: boolean, setAllProductSelect: Dispatch<SetStateAction<boolean>> }) => {
     return (
         <div className='my-4 w-full flex justify-start items-center space-x-5 text-sm'>
             <div className=' flex justify-start items-center'>
-                <FontAwesomeIcon icon={faCircleCheck} className='mr-[0.6rem] text-2xl text-kurly-purple' />
-                <span>전체선택 (0/0)</span>
+                <button onClick={() => setAllProductSelect(prev => !prev)}>
+                    <FontAwesomeIcon icon={allProductSelect ? faCircleCheck : faCircle} className='mr-[0.6rem] text-2xl text-kurly-purple' />
+                </button>
+                <span>전체선택</span>
             </div>
             <span className='text-kurly-grey text-opacity-20'>|</span>
             <span>선택삭제</span>

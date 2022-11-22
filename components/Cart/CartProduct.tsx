@@ -16,10 +16,11 @@ interface ICartProduct {
     quantity: number,
     salePercentage: number,
     originalPrice: number,
+    selectedByAll: boolean,
     setSelectedProductSum: Dispatch<SetStateAction<number>>,
     setSelectedSalesPriceSum: Dispatch<SetStateAction<number>>
 }
-export default function ({ id, name, image, quantity, salePercentage, originalPrice, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
+export default function ({ id, name, image, quantity, salePercentage, originalPrice, selectedByAll, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
     const [toggleSelect, setToggleSelect] = useState(true);
     const { mutate: cartProductsMutate } = useSWRConfig();
     const [deleteCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'DELETE' });
@@ -54,6 +55,7 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
             setSelectedSalesPriceSum(prev => prev - (quantity * (originalPrice - saledPrice)))
         }
     }, [])
+    useEffect(() => setToggleSelect(selectedByAll), [selectedByAll])
     useEffect(() => sumsUpdate({ type: 'toggle' }), [toggleSelect])
     const sumsUpdate = ({ type }: { type: 'MINUS' | 'ADD' | 'toggle' }) => {
         const operator = type === 'toggle' ? (toggleSelect ? quantity : -quantity) : (toggleSelect ? (type === 'ADD' ? 1 : -1) : 0);
