@@ -16,18 +16,18 @@ interface ICartProduct {
     quantity: number,
     salePercentage: number,
     originalPrice: number,
-    selectedByAll: boolean,
+    isSelected: boolean,
+    setSelectionState: Dispatch<SetStateAction<{ id: number, isSelected: boolean }[]>>,
     setSelectedProductSum: Dispatch<SetStateAction<number>>,
     setSelectedSalesPriceSum: Dispatch<SetStateAction<number>>
 }
-export default function ({ id, name, image, quantity, salePercentage, originalPrice, selectedByAll, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
-    const [toggleSelect, setToggleSelect] = useState(true);
+export default function ({ id, name, image, quantity, salePercentage, originalPrice, isSelected, setSelectionState, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
     const { mutate: cartProductsMutate } = useSWRConfig();
     const [deleteCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'DELETE' });
     const [modifyCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'PATCH' });
     const saledPrice = (1 - (salePercentage * 0.01)) * originalPrice;
 
-    const onProductSelected = () => setToggleSelect(prev => !prev);
+    const onChangeSelectionState = () => setSelectionState(prev => prev.map(selection => selection.id === id ? { ...selection, isSelected: !selection.isSelected } : { ...selection }));
     const onProductDelete = () => {
         cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
             const newCartProductLists = prev?.products?.filter(data => data.product.id !== id);
@@ -38,15 +38,10 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
     const onProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
         const newQuantity = quantity + ((changeType === 'MINUS' ? -1 : 1) * 1);
         cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
-            const cartList = prev.products;
-            cartList?.some((_, index: number) => {
-                const isSelected = cartList[index].product.id === id;
-                if (isSelected) cartList[index].quantity = newQuantity;
-                return isSelected;
-            })
-            return { ...prev, products: [...cartList!] };
-        }, false);
-        modifyCartProduct({ quantity });
+            const newProducts = prev.products?.map(data => data.product.id === id ? { ...data, quantity: newQuantity } : { ...data })
+            return { ...prev, products: [...newProducts!] };
+        }, false)
+        modifyCartProduct({ quantity: newQuantity });
         sumsUpdate({ type: changeType })
     }
     useEffect(() => {
@@ -55,18 +50,17 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
             setSelectedSalesPriceSum(prev => prev - (quantity * (originalPrice - saledPrice)))
         }
     }, [])
-    useEffect(() => setToggleSelect(selectedByAll), [selectedByAll])
-    useEffect(() => sumsUpdate({ type: 'toggle' }), [toggleSelect])
+    useEffect(() => { isSelected !== undefined && sumsUpdate({ type: 'toggle' }) }, [isSelected])
     const sumsUpdate = ({ type }: { type: 'MINUS' | 'ADD' | 'toggle' }) => {
-        const operator = type === 'toggle' ? (toggleSelect ? quantity : -quantity) : (toggleSelect ? (type === 'ADD' ? 1 : -1) : 0);
+        const operator = type === 'toggle' ? (isSelected ? quantity : -quantity) : (isSelected ? (type === 'ADD' ? 1 : -1) : 0);
         if (operator === 0) return;
-        setSelectedProductSum(prev => prev + originalPrice * operator)
-        setSelectedSalesPriceSum(prev => prev + (originalPrice - saledPrice) * operator)
+        setSelectedProductSum(prev => Math.abs(prev + originalPrice * operator))
+        setSelectedSalesPriceSum(prev => Math.abs(prev + (originalPrice - saledPrice) * operator))
     }
     return (
         <div className="w-full flex justify-between items-center">
             <div className="w-1/2 flex justify-start items-center cursor-pointer">
-                <button onClick={() => onProductSelected()}><FontAwesomeIcon icon={toggleSelect ? faCircleCheck : faCircle} className='mr-8 text-2xl text-kurly-purple' /></button>
+                <button onClick={() => onChangeSelectionState()}><FontAwesomeIcon icon={isSelected ? faCircleCheck : faCircle} className='mr-8 text-2xl text-kurly-purple' /></button>
                 <Link href={`/product/${id}`}>
                     <div className="flex-1 flex justify-center items-center">
                         <div className="w-[18%] aspect-[60/80] relative">

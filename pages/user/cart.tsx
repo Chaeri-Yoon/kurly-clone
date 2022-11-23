@@ -18,8 +18,9 @@ interface IUserAddress extends IDataResponse {
     }
 }
 const Cart: NextPage = () => {
-    const { data: cartData, isValidating, mutate } = useSWR<ICartProductsResponse>('/api/cart');
+    const { data: cartData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
     const [allProductSelect, setAllProductSelect] = useState(true);
+    const [selectionState, setSelectionState] = useState<{ id: number, isSelected: boolean }[]>([]);
 
     // Address
     const [shippingAddress, setShippingAddress] = useState('');
@@ -37,10 +38,17 @@ const Cart: NextPage = () => {
         })();
     }, [])
     useEffect(() => {
+        if (cartData?.ok && !isValidating) cartData.products?.map(data => {
+            const existSelected = selectionState.find(selection => selection.id === data.product.id);
+            (existSelected === undefined) && setSelectionState(prev => ([...prev, { id: data.product.id, isSelected: true }]));
+        })
+    }, [cartData])
+    useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
         setDBShippingAddress({ address: shippingAddress });
     }, [shippingAddress])
+    useEffect(() => setSelectionState(prev => prev.map(selection => ({ ...selection, isSelected: allProductSelect }))), [allProductSelect]);
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
@@ -56,8 +64,9 @@ const Cart: NextPage = () => {
                                 ) : (
                                     <div className='my-3 w-full flex flex-col'>
                                         <div className='w-full flex flex-col space-y-12'>
-                                            {cartData?.products?.map((element: { product: Product, quantity: number }) =>
-                                                <CartProduct
+                                            {cartData?.products?.map((element: { product: Product, quantity: number }) => {
+                                                const isSelected = selectionState.find(selection => selection.id === element.product.id)?.isSelected!
+                                                return <CartProduct
                                                     key={element?.product?.id}
                                                     id={element?.product?.id}
                                                     name={element?.product?.name}
@@ -65,10 +74,13 @@ const Cart: NextPage = () => {
                                                     quantity={element?.quantity}
                                                     salePercentage={element?.product?.salePercentage}
                                                     originalPrice={element?.product?.originalPrice}
-                                                    selectedByAll={allProductSelect}
+                                                    isSelected={isSelected}
+                                                    setSelectionState={setSelectionState}
                                                     setSelectedProductSum={setSelectedProductSum}
                                                     setSelectedSalesPriceSum={setSelectedSalesPriceSum}
-                                                />)}
+                                                />
+                                            }
+                                            )}
                                         </div>
                                     </div>
                                 )
@@ -103,8 +115,8 @@ const Cart: NextPage = () => {
                             <div className='w-1/2 flex flex-col items-end space-y-3'>
                                 <span>${selectedProductSum.toFixed(2)}</span>
                                 <span>${selectedSalesPriceSum.toFixed(2)}</span>
-                                <span>${selectedProductSum >= 30 ? 0 : '5'}</span>
-                                <span>$<span className='text-[1.38rem]'>{selectedProductSum >= 30 ? (selectedProductSum - selectedSalesPriceSum).toFixed(2) : (5 + (selectedProductSum - selectedSalesPriceSum)).toFixed(2)}</span></span>
+                                <span>${(selectedProductSum - selectedSalesPriceSum) >= 30 ? 0 : '5'}</span>
+                                <span>$<span className='text-[1.38rem]'>{(selectedProductSum - selectedSalesPriceSum) >= 30 ? (selectedProductSum - selectedSalesPriceSum).toFixed(2) : (5 + (selectedProductSum - selectedSalesPriceSum)).toFixed(2)}</span></span>
                             </div>
                         </div>
                     </div>
@@ -120,10 +132,11 @@ const Cart: NextPage = () => {
     )
 };
 const ProductActionByAll = ({ allProductSelect, setAllProductSelect }: { allProductSelect: boolean, setAllProductSelect: Dispatch<SetStateAction<boolean>> }) => {
+    const onSelectAllClicked = () => setAllProductSelect(prev => !prev);
     return (
         <div className='my-4 w-full flex justify-start items-center space-x-5 text-sm'>
             <div className=' flex justify-start items-center'>
-                <button onClick={() => setAllProductSelect(prev => !prev)}>
+                <button onClick={onSelectAllClicked}>
                     <FontAwesomeIcon icon={allProductSelect ? faCircleCheck : faCircle} className='mr-[0.6rem] text-2xl text-kurly-purple' />
                 </button>
                 <span>전체선택</span>
