@@ -20,7 +20,7 @@ interface IUserAddress extends IDataResponse {
 const Cart: NextPage = () => {
     const { data: cartData, isValidating } = useSWR<ICartProductsResponse>('/api/cart');
     const [allProductSelect, setAllProductSelect] = useState(true);
-    const [selectionState, setSelectionState] = useState<{ id: number, isSelected: boolean }[]>([]);
+    const [productState, setProductState] = useState<{ id: number, isSelected: boolean, isDelete: boolean }[]>([]);
 
     // Address
     const [shippingAddress, setShippingAddress] = useState('');
@@ -31,6 +31,10 @@ const Cart: NextPage = () => {
     const [selectedProductSum, setSelectedProductSum] = useState(0);
     const [selectedSalesPriceSum, setSelectedSalesPriceSum] = useState(0);
 
+    const onDeleteSelected = () => {
+        const selectedProduct = productState.filter(data => data.isSelected);
+        setProductState(prev => prev.map(data => selectedProduct.find(product => product.id === data.id) ? { ...data, isDelete: true } : { ...data }));
+    }
     useEffect(() => {
         (async () => {
             const response = await loadData<IUserAddress>({ url: '/api/user?field=address' })
@@ -38,21 +42,21 @@ const Cart: NextPage = () => {
         })();
     }, [])
     useEffect(() => {
-        if (cartData?.ok && !isValidating) cartData.products?.map(data => {
-            const existSelected = selectionState.find(selection => selection.id === data.product.id);
-            (existSelected === undefined) && setSelectionState(prev => ([...prev, { id: data.product.id, isSelected: true }]));
-        })
-    }, [cartData])
+        if (cartData?.ok && !isValidating) {
+            setProductState([]);
+            cartData.products?.map(data => setProductState(prev => ([...prev, { id: data.product.id, isSelected: true, isDelete: false }])));
+        }
+    }, [cartData, isValidating])
     useEffect(() => {
         if (!shippingAddress || shippingAddress === '') return;
         setIsAddressPopupOpen(false);
         setDBShippingAddress({ address: shippingAddress });
     }, [shippingAddress])
-    useEffect(() => setSelectionState(prev => prev.map(selection => ({ ...selection, isSelected: allProductSelect }))), [allProductSelect]);
+    useEffect(() => setProductState(prev => prev.map(selection => ({ ...selection, isSelected: allProductSelect }))), [allProductSelect]);
     return (
         <div className='mt-12 w-full p-[var(--frame-padding)] flex flex-col items-center'>
             <h1 className='mb-[3.2rem] w-full text-center text-[1.75rem] font-semibold'>장바구니</h1>
-            <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} />
+            <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} onDeleteSelected={onDeleteSelected} />
             <div className='w-full flex justify-between items-start'>
                 <div className='flex-1 mr-6 flex flex-col justify-center items-start'>
                     <div className='w-full min-h-[257px] flex flex-col justify-center items-start border-y border-black'>
@@ -65,7 +69,7 @@ const Cart: NextPage = () => {
                                     <div className='my-3 w-full flex flex-col'>
                                         <div className='w-full flex flex-col space-y-12'>
                                             {cartData?.products?.map((element: { product: Product, quantity: number }) => {
-                                                const isSelected = selectionState.find(selection => selection.id === element.product.id)?.isSelected!
+                                                const stateData = productState.find(selection => selection.id === element.product.id)!;
                                                 return <CartProduct
                                                     key={element?.product?.id}
                                                     id={element?.product?.id}
@@ -74,8 +78,9 @@ const Cart: NextPage = () => {
                                                     quantity={element?.quantity}
                                                     salePercentage={element?.product?.salePercentage}
                                                     originalPrice={element?.product?.originalPrice}
-                                                    isSelected={isSelected}
-                                                    setSelectionState={setSelectionState}
+                                                    isSelected={stateData?.isSelected}
+                                                    isDelete={stateData?.isDelete}
+                                                    setProductState={setProductState}
                                                     setSelectedProductSum={setSelectedProductSum}
                                                     setSelectedSalesPriceSum={setSelectedSalesPriceSum}
                                                 />
@@ -87,7 +92,7 @@ const Cart: NextPage = () => {
                                 )
                         }
                     </div>
-                    <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} />
+                    <ProductActionByAll allProductSelect={allProductSelect} setAllProductSelect={setAllProductSelect} onDeleteSelected={onDeleteSelected} />
                 </div>
                 <div className='w-[27.3%] flex flex-col items-start text-base'>
                     <div className='w-full flex flex-col items-center border'>
@@ -131,7 +136,10 @@ const Cart: NextPage = () => {
         </div>
     )
 };
-const ProductActionByAll = ({ allProductSelect, setAllProductSelect }: { allProductSelect: boolean, setAllProductSelect: Dispatch<SetStateAction<boolean>> }) => {
+const ProductActionByAll = (
+    { allProductSelect, setAllProductSelect, onDeleteSelected }:
+        { allProductSelect: boolean, setAllProductSelect: Dispatch<SetStateAction<boolean>>, onDeleteSelected: () => void }
+) => {
     const onSelectAllClicked = () => setAllProductSelect(prev => !prev);
     return (
         <div className='my-4 w-full flex justify-start items-center space-x-5 text-sm'>
@@ -142,7 +150,7 @@ const ProductActionByAll = ({ allProductSelect, setAllProductSelect }: { allProd
                 <span>전체선택</span>
             </div>
             <span className='text-kurly-grey text-opacity-20'>|</span>
-            <span>선택삭제</span>
+            <button onClick={onDeleteSelected}>선택삭제</button>
         </div>
     )
 }
