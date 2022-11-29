@@ -1,17 +1,15 @@
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NextPage } from 'next'
-import { FieldError, FieldErrors, FieldValues, useForm, ValidateResult } from 'react-hook-form';
-import React, { useEffect, useMemo, useState } from 'react';
+import { FieldErrors, useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
 import { loadData, mutateData } from '@libs/client/useCallApi';
 import { useRouter } from 'next/router';
 import SearchAddress from '@components/Address';
 import { useSWRConfig } from 'swr';
 import Popup from '@components/Popup';
 import { IDataExistResponse } from 'pages/api/user/dataExist';
-import classAppend from '@libs/client/classAppend';
 import AgreeButton from '@components/Join/AgreeButton';
-import DataValidationArea from '@components/Join/DataValidationArea';
 import JoinInput from '@components/Join/JoinInput';
 
 export interface IForm {

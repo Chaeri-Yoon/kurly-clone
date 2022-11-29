@@ -1,13 +1,10 @@
 import { faCircleCheck, faX } from "@fortawesome/free-solid-svg-icons";
-import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import Image from "next/image";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { mutateData } from "@libs/client/useCallApi";
-import { useSWRConfig } from "swr";
-import { ICartProductsResponse } from "pages/api/cart";
+import { faCircle } from "@fortawesome/free-regular-svg-icons";
+import { ICartActions } from "pages/user/cart";
 
 interface ICartProduct {
     id: number,
@@ -17,54 +14,20 @@ interface ICartProduct {
     salePercentage: number,
     originalPrice: number,
     isSelected: boolean,
-    isDelete: boolean,
-    setProductState: Dispatch<SetStateAction<{ id: number, isSelected: boolean, isDelete: boolean }[]>>,
-    setSelectedProductSum: Dispatch<SetStateAction<number>>,
-    setSelectedSalesPriceSum: Dispatch<SetStateAction<number>>
+    setCartActions: Dispatch<SetStateAction<ICartActions[]>>
 }
-export default function ({ id, name, image, quantity, salePercentage, originalPrice, isSelected, isDelete, setProductState, setSelectedProductSum, setSelectedSalesPriceSum }: ICartProduct) {
-    const { mutate: cartProductsMutate } = useSWRConfig();
-    const [deleteCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'DELETE' });
-    const [modifyCartProduct] = mutateData({ url: `/api/cart/${id}`, method: 'PATCH' });
+export default function ({ id, name, image, quantity, salePercentage, originalPrice, isSelected, setCartActions }: ICartProduct) {
+    const [selectedState, setSelectedState] = useState(isSelected);
+    const handleProductSelected = () => setSelectedState(prev => !prev);
+    const handleProductDeleted = () => setCartActions(prev => ([...prev, { action: "deleted", data: { id } }]));
+    const handleProductUpdated = ({ action, updatedQuantity }: { action: 'quantity', updatedQuantity: number }) => setCartActions(prev => ([...prev, { action, data: { id, updatedQuantity } }]));
     const saledPrice = (1 - (salePercentage * 0.01)) * originalPrice;
-
-    const handleChangeSelectionState = () => setProductState(prev => prev.map(stateData => stateData.id === id ? { ...stateData, isSelected: !stateData.isSelected } : { ...stateData }));
-    const onProductDeleteClicked = () => setProductState(prev => prev.map(stateData => stateData.id === id ? { ...stateData, isDelete: true } : { ...stateData }));
-    const handleProductDelete = () => {
-        cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
-            const newCartProductLists = prev?.products?.filter(data => data.product.id !== id);
-            return { ...prev, products: newCartProductLists }
-        }, false);
-        deleteCartProduct();
-    }
-    const handleProductChangeQuantity = (changeType: 'ADD' | 'MINUS') => {
-        const newQuantity = quantity + ((changeType === 'MINUS' ? -1 : 1) * 1);
-        cartProductsMutate('/api/cart', (prev: ICartProductsResponse) => {
-            const newProducts = prev.products?.map(data => data.product.id === id ? { ...data, quantity: newQuantity } : { ...data })
-            return { ...prev, products: [...newProducts!] };
-        }, false)
-        modifyCartProduct({ quantity: newQuantity });
-        sumsUpdate({ type: changeType })
-    }
-    useEffect(() => {
-        return () => {
-            setSelectedProductSum(prev => prev - (quantity * originalPrice));
-            setSelectedSalesPriceSum(prev => prev - (quantity * (originalPrice - saledPrice)));
-            setProductState(prev => ([...prev.filter(stateData => stateData.id !== id)]));
-        }
-    }, [])
-    useEffect(() => { isSelected !== undefined && sumsUpdate({ type: 'toggle' }) }, [isSelected])
-    useEffect(() => { isDelete && handleProductDelete() }, [isDelete])
-    const sumsUpdate = ({ type }: { type: 'MINUS' | 'ADD' | 'toggle' }) => {
-        const operator = type === 'toggle' ? (isSelected ? quantity : -quantity) : (isSelected ? (type === 'ADD' ? 1 : -1) : 0);
-        if (operator === 0) return;
-        setSelectedProductSum(prev => Math.abs(prev + originalPrice * operator))
-        setSelectedSalesPriceSum(prev => Math.abs(prev + (originalPrice - saledPrice) * operator))
-    }
+    useEffect(() => setCartActions(prev => ([...prev, { action: "selected", data: { id, selected: selectedState, originalPrice, saledPrice, quantity } }])), [selectedState]);
+    useEffect(() => { if (selectedState !== isSelected) setSelectedState(isSelected) }, [isSelected]);
     return (
         <div className="w-full flex justify-between items-center">
             <div className="w-1/2 flex justify-start items-center cursor-pointer">
-                <button onClick={() => handleChangeSelectionState()}><FontAwesomeIcon icon={isSelected ? faCircleCheck : faCircle} className='mr-8 text-2xl text-kurly-purple' /></button>
+                <button onClick={handleProductSelected}><FontAwesomeIcon icon={selectedState ? faCircleCheck : faCircle} className='mr-8 text-2xl text-kurly-purple' /></button>
                 <Link href={`/product/${id}`}>
                     <div className="flex-1 flex justify-center items-center">
                         <div className="w-[18%] aspect-[60/80] relative">
@@ -77,9 +40,9 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
             <div className="w-1/2 flex justify-between items-center">
                 <div className="w-1/2 flex justify-end items-center">
                     <div className="px-3 py-[0.13rem] w-1/2 flex justify-between items-center border">
-                        <button className="disabled:text-gray-300" onClick={() => handleProductChangeQuantity('MINUS')} disabled={quantity === 1}><span>-</span></button>
+                        <button className="disabled:text-gray-300" onClick={() => handleProductUpdated({ action: "quantity", updatedQuantity: quantity - 1 })} disabled={quantity === 1}><span>-</span></button>
                         <span>{quantity}</span>
-                        <button onClick={() => handleProductChangeQuantity('ADD')}><span>+</span></button>
+                        <button onClick={() => handleProductUpdated({ action: "quantity", updatedQuantity: quantity + 1 })}><span>+</span></button>
                     </div>
                 </div>
                 <div className="w-1/2 flex justify-end items-center">
@@ -87,7 +50,7 @@ export default function ({ id, name, image, quantity, salePercentage, originalPr
                         <span>${saledPrice.toFixed(2)}</span>
                         {salePercentage !== 0 && <span className="line-through text-sm text-kurly-grey">${originalPrice.toFixed(2)}</span>}
                     </div>
-                    <button onClick={onProductDeleteClicked} className="pl-[1.4rem] pr-3 text-kurly-grey opacity-50"><FontAwesomeIcon icon={faX} /></button>
+                    <button onClick={handleProductDeleted} className="pl-[1.4rem] pr-3 text-kurly-grey opacity-50"><FontAwesomeIcon icon={faX} /></button>
                 </div>
             </div>
         </div >

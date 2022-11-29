@@ -8,6 +8,7 @@ export interface ICartProductsResponse extends IDataResponse {
     products?: {
         product: Product;
         quantity: number;
+        isSelected: boolean;
     }[]
 }
 async function handler(req: NextApiRequest, res: NextApiResponse<ICartProductsResponse>) {
@@ -26,12 +27,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ICartProductsRe
                 },
                 select: {
                     product: true,
-                    quantity: true
+                    quantity: true,
                 }
             })
             return res.json({
                 ok: true,
-                products: findUserCartProducts
+                products: findUserCartProducts.map(product => ({ ...product, isSelected: true }))
             })
         } catch (error) {
             console.log(error);

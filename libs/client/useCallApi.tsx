@@ -15,7 +15,7 @@ export interface IDataResponse {
     message?: string
 }
 
-export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApiArgs): [(data?: any) => void, IMutateState<T>] {
+export function mutateData<T extends IDataResponse, S>({ url, method }: ICallApiArgs): [(data?: S) => void, IMutateState<T>] {
     const [state, setState] = useState<IMutateState<T>>({
         loading: false,
         data: {} as T,
@@ -37,7 +37,8 @@ export function loadData<T extends IDataResponse>({ url }: ICallApiArgs): Promis
 }
 
 function fetchData({ url, method, data }: ICallApiArgs): Promise<Response> {
-    return fetch(url, {
+    const finalUrl = (data && data.id) ? url + `/${data.id}` : url;
+    return fetch(finalUrl, {
         method,
         body: JSON.stringify(data),
         headers: {
